@@ -871,7 +871,7 @@ class PukiWikiTable extends PukiWikiElement
 			$this->table_around = "";
 		}
 //		echo "TABLE2: $string<br>\n";
-		if (preg_match("/(TLEFT|TCENTER|TRIGHT|(?:[^F]T))?:([0-9]+[%]?)/i",$string,$reg)) {
+		if (preg_match("/(TLEFT|TCENTER|TRIGHT|(?:[^A-Z]T)):([0-9]+[%]?)/i",$string,$reg)) {
 			if (array_key_exists (2,$reg)) {
 				if (!strpos($reg[2],"%")) $reg[2] .= "px";
 				$this->table_sheet .= "width:".$reg[2].";";
@@ -986,18 +986,20 @@ class PukiWikiPre extends PukiWikiElement
 
 	function toString()
 	{
-		$maxline = PukiWikiConfig::getParam('pre_maxlines') ? PukiWikiConfig::getParam('pre_maxlines') :20;
-		$maxcol = 0;
-		$count = count($this->elements);
+		// <Pre>による大量行出力時にスクロールバーを表示する用の処理 by nobunobu
+		$maxlines = PukiWikiConfig::getParam('pre_maxlines') ? PukiWikiConfig::getParam('pre_maxlines') :20;
+		$maxcols = PukiWikiConfig::getParam('pre_maxcols') ? PukiWikiConfig::getParam('pre_maxcols') :90;
+		$colcount = 0;
+		$linecount = count($this->elements);
 		foreach($this->elements as $line) {
-			if (mb_strwidth($line) > $maxcol) $maxcol = mb_strwidth($line);
+			if (mb_strwidth($line) > $colcount) $colcount = mb_strwidth($line);
 		}
-		if ($maxcol > 90) $count++;
-		if (($count>=$maxline) or ($maxcol > 90)) {
-			if ($count > $maxline) {
-				$count = $maxline+0.5;
+		if ($colcount > $maxcols) $linecount += 1.2; //横スクロールバーが表示されるときの為の、かなりいい加減な補正
+		if (($linecount>=$maxlines) or ($colcount > $maxcols)) {
+			if ($linecount > $maxlines) {
+				$linecount = $maxlines + 0.5;
 			}
-			return $this->wrap(join("\n", $this->elements), 'pre' ,' style="height:'.$count*1.2.'em;" class="'.PukiWikiConfig::getParam('style_prefix').'pre"');
+			return $this->wrap(join("\n", $this->elements), 'pre' ,' style="height:'.$linecount*1.2.'em;" class="'.PukiWikiConfig::getParam('style_prefix').'pre"');
 		} else {
 			return $this->wrap(join("\n", $this->elements), 'pre' ,' class="'.PukiWikiConfig::getParam('style_prefix').'pre"');
 		}
