@@ -7,6 +7,8 @@ Description:PukiWiki Render
 Author: nobunobu
 Author URI: http://www.kowa.org/
 */
+if (!defined('WP_PLUGIN_PUKIWIKI')) {
+define('WP_PLUGIN_PUKIWIKI',1);
 function pukiwiki($text) {
 	include (dirname(__FILE__).'/modPukiWiki/PukiWiki.php') ;
 
@@ -16,20 +18,7 @@ function pukiwiki($text) {
 	$text = preg_replace("/\s*<a id=\"more-(.*?)\"><\/a>/","\n\n&aname(more-\\1);",$text);
 	
 
-	$render = &new PukiWikiRender;
-//以下のオプションは必要に応じてコメントをはずして下さい。
-//PukiWikiModやB-WikiへのAutoLinkを有効にする
-//	PukiWikiConfig::setParam("autolink",3);
-
-//PukiWikiレンダリングキャッシュを使用する
-//	PukiWikiConfig::setParam("use_cache",1);
-
-//PukiWikiModテーブル拡張書式を使用する
-//	PukiWikiConfig::setParam("ExtTable",1);
-
-//WordPress記事へのInterWikiNameを定義する
-//	PukiWikiConfig::addInterWiki('['.XOOPS_URL.'/modules/wordpress/index.php? WordPress]');
-
+	$render = &new PukiWikiRender('wordpress');
 	$retstr = $render->transform($text);
 	unset($render);
 	return $retstr;
@@ -38,6 +27,7 @@ function pukiwiki($text) {
 function pukiwiki_com($text) {
 	$text=preg_replace("/^\<strong\>(.*?)\<\/strong\>\n/","''\\1''~\n",$text);
 	return pukiwiki($text);
+}
 }
 remove_filter('the_content', 'wpautop');
 remove_filter('the_content', 'wptexturize');
