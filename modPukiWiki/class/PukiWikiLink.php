@@ -208,18 +208,29 @@ class PukiWikiLink
 		
 		$r_page = rawurlencode($page);
 		$r_refer = ($refer == '') ? '' : '&amp;refer='.rawurlencode($refer);
-		
 
-		if (PukiWikiFunc::is_page($page)) {
-			$passage = "";
-			$title = PukiWikiConfig::getParam('link_compact') ? '' : " title=\"$s_page$passage\"";
-			return "<a href=\"".MOD_PUKI_WIKI_URL."?$r_page$anchor\"$title>$s_alias</a>";
-		} else {
-			$retval = "$s_alias<a href=\"".MOD_PUKI_WIKI_URL."?cmd=edit&amp;page=$r_page$r_refer\">".PukiWikiConfig::getParam('_symbol_noexists')."</a>";
-			if (!PukiWikiConfig::getParam('link_compact')) {
-				$retval = "<span class=\"".PukiWikiConfig::getParam('style_prefix')."noexists\">$retval</span>";
+		if (PukiWikiConfig::getParam('LocalShowURL')) {
+			if (PukiWikiFunc::is_local_page($page)) {
+				$passage = "";
+				$title = PukiWikiConfig::getParam('link_compact') ? '' : " title=\"$s_page$passage\"";
+				$url = sprintf(PukiWikiConfig::getParam('LocalShowURL'),$r_page);
+				return "<a href=\"$url$anchor\"$title>$s_alias</a>";
 			}
-			return $retval;
+		}
+		if (defined('MOD_PUKI_WIKI_URL')) {
+			if (PukiWikiFunc::is_page($page)) {
+				$passage = "";
+				$title = PukiWikiConfig::getParam('link_compact') ? '' : " title=\"$s_page$passage\"";
+				return "<a href=\"".MOD_PUKI_WIKI_URL."?$r_page$anchor\"$title>$s_alias</a>";
+			} else {
+				$retval = "$s_alias<a href=\"".MOD_PUKI_WIKI_URL."?cmd=edit&amp;page=$r_page$r_refer\">".PukiWikiConfig::getParam('_symbol_noexists')."</a>";
+				if (!PukiWikiConfig::getParam('link_compact')) {
+					$retval = "<span class=\"".PukiWikiConfig::getParam('style_prefix')."noexists\">$retval</span>";
+				}
+				return $retval;
+			}
+		} else {
+			return $s_alias;
 		}
 	}
 }
@@ -501,6 +512,44 @@ class PukiWikiLink_wikiname extends PukiWikiLink
 			$this->page
 		);
 	}
+	function make_pagelink($page, $alias='',$anchor='',$refer='')
+	{
+		$s_page = htmlspecialchars(PukiWikiFunc::strip_bracket($page));
+		$s_alias = ($alias == '') ? $s_page : $alias;
+		
+		if ($page == '') {
+			return "<a href=\"$anchor\">$s_alias</a>";
+		}
+		
+		$r_page = rawurlencode($page);
+		$r_refer = ($refer == '') ? '' : '&amp;refer='.rawurlencode($refer);
+		
+		if (PukiWikiConfig::getParam('LocalShowURL')) {
+			if (PukiWikiFunc::is_local_page($page)) {
+				$passage = "";
+				$title = PukiWikiConfig::getParam('link_compact') ? '' : " title=\"$s_page$passage\"";
+				$url = sprintf(PukiWikiConfig::getParam('LocalShowURL'),$r_page);
+				return "<a href=\"$url$anchor\"$title>$s_alias</a>";
+			}
+		}
+		if (defined('MOD_PUKI_WIKI_URL')) {
+			if (PukiWikiFunc::is_page($page)) {
+				$passage = "";
+				$title = PukiWikiConfig::getParam('link_compact') ? '' : " title=\"$s_page$passage\"";
+				return "<a href=\"".MOD_PUKI_WIKI_URL."?$r_page$anchor\"$title>$s_alias</a>";
+			} else {
+				// ページ作成リンクをつけないオプション追加 by nao-pon
+				if (PukiWikiConfig::getParam('makepage_link')) return $s_alias;
+				$retval = "$s_alias<a href=\"".MOD_PUKI_WIKI_URL."?cmd=edit&amp;page=$r_page$r_refer\">".PukiWikiConfig::getParam('_symbol_noexists')."</a>";
+				if (PukiWikiConfig::getParam('link_compact')) {
+					$retval = "<span class=\"".PukiWikiConfig::getParam('style_prefix')."noexists\">$retval</span>";
+				}
+				return $retval;
+			}
+		} else {
+			return $s_alias;
+		}
+	}
 }
 // AutoLink
 class PukiWikiLink_autolink extends PukiWikiLink
@@ -512,13 +561,17 @@ class PukiWikiLink_autolink extends PukiWikiLink
 	function PukiWikiLink_autolink($start)
 	{
 		parent::PukiWikiLink($start);
-		
 		$autolink = PukiWikiConfig::getParam('autolink');
-		if (!$autolink or !file_exists(MOD_PUKI_WIKI_CACHE_DIR.'autolink.dat'))
+		$autolink_data = PukiWikiConfig::getParam('autolink_dat');
+		// AutoLinkデータを予めチェックするようにした by nao-pon
+		//if (!$autolink or !file_exists(MOD_PUKI_WIKI_CACHE_DIR.'autolink.dat'))
+		if (!$autolink or !$autolink_data)
 		{
 			return;
 		}
-		@list($auto,$auto_a,$forceignorepages) = file(MOD_PUKI_WIKI_CACHE_DIR.'autolink.dat');
+		// AutoLinkデータを予めチェックするようにした by nao-pon
+		//@list($auto,$auto_a,$forceignorepages) = file(MOD_PUKI_WIKI_CACHE_DIR.'autolink.dat');
+		@list($auto,$auto_a,$forceignorepages) = $autolink_data;
 		$this->auto = $auto;
 		$this->auto_a = $auto_a; 
 		$this->forceignorepages = explode("\t",trim($forceignorepages));
@@ -536,12 +589,28 @@ class PukiWikiLink_autolink extends PukiWikiLink
 		$WikiName = PukiWikiConfig::getParam('WikiName');
 		
 		list($name) = $this->splice($arr);
-		// 無視リストに含まれている、あるいは存在しないページをﾌてる
-		if (in_array($name,$this->forceignorepages) or !PukiWikiFunc::is_page($name))
+		
+		// 共通リンクディレクトリ対応 by nao-pon
+		$alias = $name;
+		
+		// 無視リストに含まれている、あるいは存在しないページを捨てる
+		// 共通リンクディレクトリ対応 by nao-pon
+		//if (in_array($name,$this->forceignorepages) or PukiWikiFunc::is_page($name))
+		if (in_array($name,$this->forceignorepages))
 		{
 			return FALSE;
 		}
-		return parent::setParam($page,$name,'','pagename',$name);
+		
+		// 共通リンクディレクトリを探す by nao-pon
+		if (PukiWikiFunc::is_page($name))
+		{
+			if (!$name = PukiWikiFunc::get_real_pagename($name))
+				return FALSE;
+		}
+		
+		// 共通リンクディレクトリ対応 by nao-pon
+		//return parent::setParam($page,$name,'','pagename',$name);
+		return parent::setParam($page,$name,'','pagename',$alias);
 	}
 	function toString()
 	{
