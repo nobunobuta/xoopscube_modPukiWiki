@@ -202,7 +202,7 @@ class MyTextSanitizer
 		$replacements[] = "about :";
 		return preg_replace($patterns, $replacements, $text);
 	}
-//nobunobu for modPukiWiki based on nao-pon's Hack
+//nobunobu for modPukiWiki
 	/**
 	 * Replace PukiWiki with their equivalent HTML formatting
      *
@@ -210,37 +210,18 @@ class MyTextSanitizer
      *
      * @return	string
 	 */
-	function &renderWikistyle(&$text) 
+	function &renderWikistyle(&$text, $xcode=1, $image=1)
 	{
 		//modPukiWiki
 		include_once(XOOPS_ROOT_PATH.'/class/modPukiWiki/PukiWiki.php');
 		static $render;
 		if (!is_object($render))
 			$render = &new PukiWikiRender('xoops');
-		//[code][/code]Ç∆ÇÃã§ë∂ÇãñÇ∑ÇΩÇﬂÇÃí≤êÆ
-		$texts = preg_split("/\[code].*\[\/code\]/sU",$text);
-		preg_match_all("/\[code].*\[\/code\]/sU",$text,$match,PREG_PATTERN_ORDER);
-		$ret = "";
-		$i=0;
-		$count = count($match[0]);
-		foreach($texts as $block)
-		{
-			if ($i < $count)
-				$ret .= $block."\n\n_____cODe_".$i."_____\n\n";
-			else
-				$ret .= $block;
-			$i++;
-		}
-		$ret = $render->transform($ret);
-		$i -= 2 ;
-		while($i >= 0)
-		{
-			$ret = str_replace("_____cODe_".$i."_____",$match[0][$i],$ret);
-			$i--;
-		}
-		// XOOPS Quote styleÇ…íuÇ´ä∑Ç¶
-		$ret = str_replace(array('<blockquote>','</blockquote>'),array(_QUOTEC.'<div class="xoopsQuote"><blockquote>','</blockquote></div>'),$ret);
-		return $ret;
+		$text =& $this->codePreConv($text, $xcode); // Ryuji_edit(2003-11-18)
+		$text = $render->transform($text);
+		// XOOPS Quote style
+		$text = str_replace(array('<blockquote>','</blockquote>'),array(_QUOTEC.'<div class="xoopsQuote"><blockquote>','</blockquote></div>'),$text);
+		return $text;
 	}
 //nobunobu for modPukiWiki END
 
@@ -325,11 +306,12 @@ class MyTextSanitizer
 			// html not allowed
 //nobunobu for modPukiWiki
 //			$text =& $this->htmlSpecialChars($text);
-			$text =& $this->renderWikistyle($text);
+			$text =& $this->renderWikistyle($text, $xcode, $image);
 			$br = 0;
+		} else {
+			$text =& $this->codePreConv($text, $xcode); // Ryuji_edit(2003-11-18)
 //nobunobu for modPukiWiki END
 		}
-		$text =& $this->codePreConv($text, $xcode); // Ryuji_edit(2003-11-18)
 		$text =& $this->makeClickable($text);
 		if ($smiley != 0) {
 			// process smiley
@@ -372,9 +354,10 @@ class MyTextSanitizer
 //			$text =& $this->htmlSpecialChars($text);
 			$text =& $this->renderWikistyle($text);
 			$br = 0;
+		} else {
+			$text =& $this->codePreConv($text, $xcode); // Ryuji_edit(2003-11-18)
 //nobunobu for modPukiWiki END
 		}
-		$text =& $this->codePreConv($text, $xcode); // Ryuji_edit(2003-11-18)
 		$text =& $this->makeClickable($text);
 		if ($smiley != 0) {
 			// process smiley
@@ -439,6 +422,15 @@ class MyTextSanitizer
 		if($xcode != 0){
 			$patterns = "/\[code](.*)\[\/code\]/esU";
 			$replacements = "'[code]'.base64_encode('$1').'[/code]'";
+			$text =  preg_replace($patterns, $replacements, $text);
+		}
+		return $text;
+	}
+
+	function codePostConv($text, $xcode = 1) {
+		if($xcode != 0){
+			$patterns = "/\[code](.*)\[\/code\]/esU";
+			$replacements = "'[code]'.base64_decode('$1').'[/code]'";
 			$text =  preg_replace($patterns, $replacements, $text);
 		}
 		return $text;
