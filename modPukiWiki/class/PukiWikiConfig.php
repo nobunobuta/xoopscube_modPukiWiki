@@ -20,7 +20,11 @@ class PukiWikiConfig {
 	
 	function getParam($name) {
 		global $_PukiWikiParam;
-		return $_PukiWikiParam[$name];
+		if (!empty($_PukiWikiParam[$name])) {
+			return $_PukiWikiParam[$name];
+		} else {
+			return null;
+		}
 	}
 	
 	function initRules() {
