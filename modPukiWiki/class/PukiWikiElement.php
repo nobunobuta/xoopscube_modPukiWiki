@@ -429,32 +429,31 @@ class PukiWikiTableCell extends PukiWikiElement
 	{
 		parent::PukiWikiElement();
 		$this->style = $matches = array();
-		if (!PukiWikiConfig::getParam("ExtTable")) {
-			while (preg_match('/^(?:(LEFT|CENTER|RIGHT)|(BG)?COLOR\(([#\w]+)\)|SIZE\((\d+)\)):(.*)$/',$text,$matches))
-			{
-				if ($matches[1])
-				{
-					$this->style['align'] = 'text-align:'.strtolower($matches[1]).';';
-					$text = $matches[5];
-				}
-				else if ($matches[3])
-				{
-					$name = $matches[2] ? 'background-color' : 'color';
-					$this->style[$name] = $name.':'.htmlspecialchars($matches[3]).';';
-					$text = $matches[5];
-				}
-				else if ($matches[4])
-				{
-					$this->style['size'] = 'font-size:'.htmlspecialchars($matches[4]).'px;';
-					$text = $matches[5];
-				}
-			}
-			if ($is_template and is_numeric($text))
-			{
-				$this->style['width'] = "width:{$text}px;";
-			}
-		} else {
+		if (PukiWikiConfig::getParam("ExtTable")) {
 			$text = $this->get_cell_style($text);
+		}
+		while (preg_match('/^(?:(LEFT|CENTER|RIGHT)|(BG)?COLOR\(([#\w]+)\)|SIZE\((\d+)\)):(.*)$/',$text,$matches))
+		{
+			if ($matches[1])
+			{
+				$this->style['align'] = 'text-align:'.strtolower($matches[1]).';';
+				$text = $matches[5];
+			}
+			else if ($matches[3])
+			{
+				$name = $matches[2] ? 'background-color' : 'color';
+				$this->style[$name] = $name.':'.htmlspecialchars($matches[3]).';';
+				$text = $matches[5];
+			}
+			else if ($matches[4])
+			{
+				$this->style['size'] = 'font-size:'.htmlspecialchars($matches[4]).'px;';
+				$text = $matches[5];
+			}
+		}
+		if ($is_template and is_numeric($text))
+		{
+			$this->style['width'] = "width:{$text}px;";
 		}
 		if ($text == '>')
 		{
@@ -593,19 +592,21 @@ class PukiWikiTableCell extends PukiWikiElement
 		}
 		// セル規定文字揃え、幅指定
 		if (preg_match("/(LEFT|CENTER|RIGHT)?:(TOP|MIDDLE|BOTTOM)?(?::)?([0-9]+[%]?)?/i",$cells[0],$tmp)) {
-			if (!empty($tmp[3])) {
-				if ($tmp[3]) {
-					if (!strpos($tmp[3],"%")) $tmp[3] .= "px";
-					$this->style['width'] = "width:".$tmp[3].";";
+			if ($tmp[0] != ':') {
+				if (!empty($tmp[3])) {
+					if ($tmp[3]) {
+						if (!strpos($tmp[3],"%")) $tmp[3] .= "px";
+						$this->style['width'] = "width:".$tmp[3].";";
+					}
 				}
+				if (!empty($tmp[1])) {
+					if ($tmp[1]) $this->style['align'] = "text-align:".strtolower($tmp[1]).";";
+				}
+				if (!empty($tmp[2])) {
+					if ($tmp[2]) $this->style['valign'] = "vertical-align:".strtolower($tmp[2]).";";
+				}
+				$cells[0] = preg_replace("/(LEFT|CENTER|RIGHT)?:(TOP|MIDDLE|BOTTOM)?(?::)?([0-9]+[%]?)?/i","",$cells[0]);
 			}
-			if (!empty($tmp[1])) {
-				if ($tmp[1]) $this->style['align'] = "text-align:".strtolower($tmp[1]).";";
-			}
-			if (!empty($tmp[2])) {
-				if ($tmp[2]) $this->style['valign'] = "vertical-align:".strtolower($tmp[2]).";";
-			}
-			$cells[0] = preg_replace("/(LEFT|CENTER|RIGHT)?:(TOP|MIDDLE|BOTTOM)?(?::)?([0-9]+[%]?)?/i","",$cells[0]);
 		}
 //		echo "CELL2: {$cells[0]}<br>\n";
 //		var_dump($this->style);
@@ -873,7 +874,7 @@ class PukiWikiYTable extends PukiWikiElement
 	{
 		parent::PukiWikiElement();
 		
-		$_value = csv_explode(',', substr($text,1));
+		$_value = PukiWikiFunc::csv_explode(',', substr($text,1));
 		if (count($_value) == 0)
 		{
 			$this = new PukiWikiInline($text);
@@ -1147,7 +1148,7 @@ class PukiWikiBody extends PukiWikiElement
 		// #contents
 		$text = preg_replace_callback('/(<p[^>]*>)<del>#contents<\/del>(\s*)(<\/p>)/', array(&$this,'replace_contents'),$text);
 		
-		return "$text\n";
+		return "$text";
 	}
 
 	function replace_contents($arr)
