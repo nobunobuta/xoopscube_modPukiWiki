@@ -1,0 +1,280 @@
+/*
+ * modPukiWikiÍÑ¤Î¥¹¥¿¥¤¥ë¥·¡¼¥È¥µ¥ó¥×¥ë
+ */
+div.modPuki_ie5 {
+	text-align:left;
+}
+
+.modPuki_style_table
+{
+	padding:0px;
+	border:0px;
+	margin:2px 0px 2px 0px;
+	text-align:left;
+	color:inherit;
+	width:auto;
+	background-color:#ccd5dd;
+}
+
+.modPuki_style_th
+{
+	padding:5px;
+	margin:1px;
+	text-align:center;
+	color:inherit;
+	background-color:#EEEEEE;
+}
+
+thead th.modPuki_style_th,
+tfoot th.modPuki_style_th
+{
+	color:inherit;
+	background-color:#E0E8F0;
+}
+
+.modPuki_style_td
+{
+	padding:5px;
+	margin:1px;
+	color:inherit;
+	background-color:#EEF5FF;
+}
+
+thead td.modPuki_style_td,
+tfoot td.modPuki_style_td
+{
+	color:inherit;
+	background-color:#D0D8E0;
+}
+h1.modPuki_head {
+	font-size : 20pt;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+	border-left: 10px solid #dcdcdc;
+	border-bottom: 1px solid #dcdcdc;
+	background-color:#FEFEFE;
+	padding-left: 0.3em;
+	margin-left: 0px;
+	margin-bottom: 5px;
+}
+h2.modPuki_head {
+	font-size : 16pt;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+	border-left: 10px solid #dcdcdc;
+	border-bottom: 1px solid #dcdcdc;
+	background-color:#FEFEFE;
+	padding-left: 0.3em;
+	margin-left: 0px;
+	margin-bottom: 5px;
+}
+h3.modPuki_head {
+	font-size : 12pt;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+	border-left: 10px solid #dcdcdc;
+	border-bottom: 1px solid #dcdcdc;
+	background-color:#FEFEFE;
+	padding-left: 0.3em;
+	margin-left: 0px;
+	margin-bottom: 5px;
+}
+
+h4.modPuki_head {
+	font-size : 11pt;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+	border-left: 10px solid #dcdcdc;
+	border-bottom: 1px solid #dcdcdc;
+	background-color:#FEFEFE;
+	padding-left: 0.3em;
+	margin-left: 0px;
+	margin-bottom: 5px;
+}
+
+h5.modPuki_head {
+	font-size : 10pt;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+	background-color: #DDEEFF;
+	padding: 0px;
+	margin-left: 0px;
+}
+
+h6.modPuki_head {
+	font-size : 9pt;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+	background-color: #DDEEFF;
+	padding: 0px;
+	margin-left: 0px;
+}
+
+ul.modPuki_list1 li
+{
+	list-style-type:disc;
+}
+ul.modPuki_list2 li
+{
+	list-style-type:circle;
+}
+ul.modPuki_list3 li
+{
+	list-style-type:square;
+}
+ol.modPuki_list1 li
+{
+	list-style-type:decimal;
+}
+ol.modPuki_list2 li
+{
+	list-style-type:lower-roman;
+}
+ol.modPuki_list3 li
+{
+	list-style-type:lower-alpha;
+}
+
+pre.modPuki_pre {
+	border-top:    #DDDDEE 1px solid;
+	border-bottom: #888899 1px solid;
+	border-left:   #DDDDEE 1px solid;
+	border-right:  #888899 1px solid;
+	font-size:12px;
+	line-height:120%;
+	padding:0.5em 10px 0.5em 10px;
+	margin: 5px 10px 5px 20px;
+	white-space: pre;
+	width:95ex;
+	height:auto;
+	max-width:95ex;
+	background-color: #F0F8FF;
+	color: black;
+	overflow:auto; /* Moziila/OperaÂÐºö */
+	white-space: pre;
+}
+
+span.modPuki_noexists
+{
+	color:inherit;
+	background-color:#FFFACC;
+}
+
+.modPuki_small
+{
+	font-size:80%;
+}
+
+
+a.modPuki_note_super
+{
+	color:#DD3333;
+	background-color:inherit;
+	font-weight:bold;
+	font-size:60%;
+	vertical-align:super;
+}
+
+hr.modPuki_full_hr
+{
+	border-style:ridge;
+	border-color:#333333;
+	border-width:1px 0px;
+}
+hr.modPuki_note_hr
+{
+	width:90%;
+	border-style:ridge;
+	border-color:#333333;
+	border-width:1px 0px;
+	text-align:center;
+	margin:1em auto 0em auto;
+}
+
+span.modPuki_size1
+{
+	font-size:xx-small;
+	line-height:130%;
+	text-indent:0px;
+	display:inline;
+}
+span.modPuki_size2
+{
+	font-size:x-small;
+	line-height:130%;
+	text-indent:0px;
+	display:inline;
+}
+span.modPuki_size3
+{
+	font-size:small;
+	line-height:130%;
+	text-indent:0px;
+	display:inline;
+}
+span.modPuki_size4
+{
+	font-size:medium;
+	line-height:130%;
+	text-indent:0px;
+	display:inline;
+}
+span.modPuki_size5
+{
+	font-size:large;
+	line-height:130%;
+	text-indent:0px;
+	display:inline;
+}
+span.modPuki_size6
+{
+	font-size:x-large;
+	line-height:130%;
+	text-indent:0px;
+	display:inline;
+}
+span.modPuki_size7
+{
+	font-size:xx-large;
+	line-height:130%;
+	text-indent:0px;
+	display:inline;
+}
+
+.modPuki_quotation {
+}
+
+/* aname.inc.php */
+.modPuki_anchor
+{
+}
+.modPuki_anchor_super
+{
+	font-size:xx-small;
+	vertical-align:super;
+}
+
+/* br.inc.php */
+br.modPuki_spacer
+{
+}
+
+/* clear.inc.php */
+.modPuki_clear{
+	margin:0px;
+	clear:both;
+}
+
+/* recent.inc.php,showrss.inc.php */
+ul.modPuki_recent_list
+{
+/*
+	padding:0px;
+	border:0px;
+	margin:0px 0px 0px 1em;
+	word-wrap:break-word;
+	word-break:break-all;
+*/
+}
+
+/* ref.inc.php */
+div.modPuki_img_margin
+{
+	margin-left:32px;
+	margin-right:32px;
+}
+

@@ -1,26 +1,25 @@
 PukiWikiModをXOOPSに組み込むHackです。
+環境や用途によって、４種類を用意しています。
 
-PukiWikiModの作者、nao-ponさんのHackをベースにしています。
-XOOPSのサニタイザを使っているモジュールで PukiWiki書式が使用できるようになります。
-XOOPSの従来のBBcodeやSmilyもそのままで使えるはずですが、一つのコンテンツの中で、
-変に併用すると予期しない結果になる場合も起こり得ますのでご注意下さい。
+TYPE1: XOOPSのサニタイザを使っているモジュールでTextArea内に入力したテキストを
+　　　 PukiWiki書式として扱います。
 
-このHackは、XOOPS2.0.7のファイルをベースにしています。
+TYPE2: XOOPSのサニタイザを使っているモジュールでTextArea内に入力したテキストで
+　　　 [wiki][/wiki]で囲んだ文字列部分をPukiWiki書式として扱います。
 
-[導入方法］
-１．XOOPS_ROOT_PATH/class/ 以下に modPukiWiki をディレクトリごと配置して下さい。
-２．class/module.textsanitizer.phpをXOOPS_ROOT_PATH/class/以下の物と置き換えて下さい。
-３．modPukiWiki/sample.cssの中身を使用しているテーマのスタイルシートにコピーして下さい。
+それぞれに、一長一短がありますが特徴や導入方法については、各ディレクトリ内の
+ReadMe.txtを参照して下さい。
+
+このHackは、XOOPS2.0.7.3のファイルをベースにしています。
+
+TYPE1_ML 及び TYPE2_ML は、XOOPS MultiLanguages Hackを適用している場合に対応した
+HACKファイルです。
 
 参考）
 contrib/nao-pon hack/module.textsanitizer.php
 に、nao-ponさんのハックを載せておきます。詳しくは、
 http://hypweb.net/xoops/modules/pukiwiki/1324.html
 を参照して下さい。
-
-contrib/ml hack/module.textsanitizer.php
-[ja][/ja][en][/en]などで多言語対応のコンテンツ作成用のハックに対応した
-ファイルを載せておきます。
 
 contrib/PukiWikiHelper
 XOOPSのTextArea入力コントロールにPukiWiki用の書式ヘルパーを追加するハックです。
