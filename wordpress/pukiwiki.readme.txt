@@ -7,6 +7,7 @@ WordPress用のPukiWikiレンダープラグインです。
 　　mdoPukiWiki用の設定を変更する
 ４．themes/default/wp-layout.cssをthemes/default/にコピーするか、このファイルを参考にして、
 　　テーマ用にカストマイズしたスタイルシートを修正する。
+　　(純正のWordPressMEの場合は、wp-layout.cssは、WordPressディレクトリに置く必要があります)
 ５．WordPressのPlugin設定画面で、pukiwikiを有効にする。
 
 導入後のディレクトリツリーイメージ
