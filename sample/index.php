@@ -5,7 +5,7 @@
 <meta http-equiv="content-language" content="ja" />
 <title>modPukiWikiサンプル</title>
 <!-- サンプルのスタイルシートを読み込む。場所は環境によって設定 -->
-<link rel="stylesheet" type="text/css" media="all" href="../modpukiwiki/sample.css" />
+<link rel="stylesheet" type="text/css" media="all" href="../modPukiWiki/sample.css" />
 </head>
 <body>
 <?php
@@ -105,6 +105,70 @@ $text = <<< EOD
 ***InterWikiも実装
  -[[のぶのぶの検索:Google:のぶのぶ]]
 -[[のぶのぶの検索>Google:のぶのぶ]]
+***nao-ponさんのPukiWikiMod拡張テーブル書式
+ |TLEFT:600 LEFT:50%|CENTER:MIDDLE:50%|c
+ |}->
+ ****bbb->
+ -aa->
+ -bb->
+ ->
+ aaaaa((テスト))->
+ ->
+ |TLEFT:250CENTER:50%B:1,0oneBC:blackK:1,0|RIGHT:MIDDLE:50%|c->
+ |}BC:#f088f0K:2KC:red->
+ *****cccc->
+ ->
+ aaaa{|}aaa{|->
+ |cccc|BC:greendddd|->
+ {|a|
+ 
+ |TLEFT:80%LEFT:|LEFT:|c
+ |->
+ ****aaaaa->
+ -aaa->
+ --aaaa->
+ ->
+ |test|
+ 
+ |TRIGHT:80%B:5oneLEFT:50%TC:0BC:0K:3KC:red|LEFT:MIDDLE:50%BC:0K:3KC:blue|c
+ |->
+ ****aaaaa->
+ -aaa->
+ --aaaa->
+ ->
+ |test| 
+
+|TLEFT:600LEFT:50%|CENTER:MIDDLE:50%|c
+|}->
+****bbb->
+-aa->
+-bb->
+->
+aaaaa((テスト))->
+->
+|TLEFT:250CENTER:50%B:1,0oneBC:blackK:1,0|RIGHT:MIDDLE:50%|c->
+|}BC:#f088f0K:2KC:red->
+*****cccc->
+->
+aaaa{|}aaa{|->
+|cccc|BC:greendddd|->
+{|a|
+
+|TLEFT:80%LEFT:|LEFT:|c
+|->
+****aaaaa->
+-aaa->
+--aaaa->
+->
+|test|
+
+|TRIGHT:80%B:5oneLEFT:50%TC:0BC:0K:3KC:red|LEFT:MIDDLE:50%BC:0K:3KC:blue|c
+|->
+****aaaaa->
+-aaa->
+--aaaa->
+->
+|test|
 EOD;
 
 //PukiWikiRenderインスタンス生成
