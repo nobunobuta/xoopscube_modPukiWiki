@@ -22,7 +22,7 @@ function plugin_setlinebreak_convert()
 	}
 	if (func_num_args() == 0)
 	{
-		PukiWikiConfig::setParam('line_break', !$PukiWikiConfig::getParam('line_break'));
+		PukiWikiConfig::setParam('line_break', !PukiWikiConfig::getParam('line_break'));
 		return '';
 	}
 
