@@ -608,7 +608,7 @@ class PukiWikiTableCell extends PukiWikiElement
 				if (array_key_exists (2,$tmp)) {
 					if ($tmp[2]) $this->style['valign'] = "vertical-align:".substr(strtolower($tmp[2]),1).";";
 				}
-				$cells[0] = preg_replace("/(LEFT|CENTER|RIGHT)(:TOP|:MIDDLE|:BOTTOM)?(:([0-9]+[%]?))?/i","",$cells[0]);
+				$cells[0] = preg_replace("/(LEFT:|CENTER:|RIGHT:)(TOP:|MIDDLE:|BOTTOM:)?(([0-9]+[%]?))?/i","",$cells[0]);
 			}
 		}
 //		echo "CELL2: {$cells[0]}<br>\n";
