@@ -95,7 +95,7 @@ class PukiWikiRender {
 			return "";
 		} else {
 			$source = str_replace("\r", '', file(PukiWikiFunc::get_local_filename($page)));
-			return implode("\n",$source);
+			return implode("",$source);
 		}
 	}
 	// Private メソッド関数群
