@@ -13,8 +13,11 @@ XOOPSの従来のBBcodeやSmilyもそのままで使えるはずですが、一つのコンテンツの中で、
 ３．modPukiWiki/sample.cssの中身を使用しているテーマのスタイルシートにコピーして下さい。
 
 参考）
-class/nao-pon-hack/module.textsanitizer.php
+class/nao-pon hack/module.textsanitizer.php
 に、nao-ponさんのハックを載せておきます。詳しくは、
 http://hypweb.net/xoops/modules/pukiwiki/1324.html
 を参照して下さい。
 
+class/ml hack/module.textsanitizer.php
+[ja][/ja][en][/en]などで多言語対応のコンテンツ作成用のハックに対応した
+ファイルを載せておきます。
