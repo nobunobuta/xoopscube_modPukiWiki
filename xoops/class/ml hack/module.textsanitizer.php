@@ -339,9 +339,12 @@ class MyTextSanitizer
 		if ($html != 1) {
 			// html not allowed
 //nobunobu for modPukiWiki
-//			$text =& $this->htmlSpecialChars($text);
-			$text =& $this->renderWikistyle($text, $xcode, $image);
-			$br = 0;
+			if ($xcode) {
+				$text =& $this->renderWikistyle($text, $xcode, $image);
+				$br = 0;
+			} else {
+				$text =& $this->htmlSpecialChars($text);
+			}
 		} else {
 			$text =& $this->codePreConv($text, $xcode); // Ryuji_edit(2003-11-18)
 //nobunobu for modPukiWiki END
