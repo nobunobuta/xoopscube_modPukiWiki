@@ -175,6 +175,7 @@ EOD;
 $render = new PukiWikiRender;
 //InterWikiNameの設定
 PukiWikiConfig::addInterWiki('[http://www.google.co.jp/search?ie=utf8&oe=utf8&q=$1&lr=lang_ja&hl=ja Google] utf8');
+PukiWikiConfig::setParam('ExtTable',true);
 //レンダリングして表示
 echo $render->transform($text);
 ?>
