@@ -113,7 +113,6 @@ class PukiWikiInline extends PukiWikiElement
 	function toString()
 	{
 		$str = join(PukiWikiConfig::getParam('line_break') ? "<br />\n" : "\n",$this->elements);
-		$str .= PukiWikiConfig::getParam('line_break') ? "<br />\n" : "";
 		return $str;
 	}
 
@@ -167,10 +166,8 @@ class PukiWikiHeading extends PukiWikiElement
 		parent::PukiWikiElement();
 		
 		$this->level = min(6, strspn($text, '*'));
-//		echo $this->level;
 		list($text, $this->msg_top, $this->id) = $root->getAnchor($text, $this->level);
 		$this->insert(new PukiWikiInline($text));
-//		$this->level++; // h2,h3,h4
 	}
 
 	function &insert(&$obj)
@@ -385,7 +382,7 @@ class PukiWikiBQuote extends PukiWikiElement
 	function &insert(&$obj)
 	{
         // BugTrack/521, BugTrack/545
-		if (is_a($obj, 'inline')) {
+		if (is_a($obj, 'PukiWikiInline')) {
         	return parent::insert($obj->toPara(' class="'.PukiWikiConfig::getParam('style_prefix').'quotation"'));
         }
 		if (is_a($obj, 'PukiWikiBQuote') and $obj->level == $this->level and count($obj->elements))
