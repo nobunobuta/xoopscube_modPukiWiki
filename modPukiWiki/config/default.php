@@ -14,6 +14,9 @@
 // レンダリングキャッシュを有効にする
 	$_settings['use_cache'] = 0;
 /////////////////////////////////////////////////
+// PukiWikiModへのリンクを静的URL形式にする
+	$_settings['use_static_url'] = 0;
+/////////////////////////////////////////////////
 // 改行を反映する(改行を<br />に置換する)
 	$_settings['line_break'] = 0;
 /////////////////////////////////////////////////
@@ -23,8 +26,8 @@
 // <pre>をスクロールバーを出さずに表示する行数(環境やスタイルによっては正確ではない)
 	$_settings['pre_maxlines'] = 20;
 /////////////////////////////////////////////////
-// <pre>をスクロールバーを出さずに表示する文字数(環境やスタイルによっては正確ではない)
-	$_settings['pre_cols'] = 90;
+// URLリンクを、[[alias:URL]]と指定したときのターゲット
+	$_settings['link_target'] = '_blank';
 /////////////////////////////////////////////////
 // 拡張テーブル書式を使用する
 	$_settings['ExtTable'] = false;
@@ -36,12 +39,6 @@
 /////////////////////////////////////////////////
 // 大・小見出しから目次へ戻るリンクの文字
 	$_settings['top'] = "";
-/////////////////////////////////////////////////
-// PukiWikiModへのリンクを静的URL形式にする
-	$_settings['use_static_url'] = 0;
-/////////////////////////////////////////////////
-// URLリンクを、[[alias:URL]]と指定したときのターゲット
-	$_settings['link_target'] = '_blank';
 /////////////////////////////////////////////////
 // リンク表示をコンパクトにする
 	$_settings['link_compact'] = 0;
@@ -136,6 +133,20 @@
 			'\s(\;\))' => ' <img src="'.MOD_PUKI_UPLOAD_URL.'wink.gif" alt="$1" />',
 			'\s(\;\()' => ' <img src="'.MOD_PUKI_UPLOAD_URL.'sad.gif" alt="$1" />',
 			'(&amp;heart;)' => ' <img src="'.MOD_PUKI_UPLOAD_URL.'heart.gif" alt="$1" />',
+			'&amp;(smile);'	=> ' <img alt="[$1]" src="' . MOD_PUKI_UPLOAD_URL . 'smile.gif" />',
+			'&amp;(bigsmile);'=>' <img alt="[$1]" src="' . MOD_PUKI_UPLOAD_URL . 'bigsmile.gif" />',
+			'&amp;(huh);'	=> ' <img alt="[$1]" src="' . MOD_PUKI_UPLOAD_URL . 'huh.gif" />',
+			'&amp;(oh);'	=> ' <img alt="[$1]" src="' . MOD_PUKI_UPLOAD_URL . 'oh.gif" />',
+			'&amp;(wink);'	=> ' <img alt="[$1]" src="' . MOD_PUKI_UPLOAD_URL . 'wink.gif" />',
+			'&amp;(sad);'	=> ' <img alt="[$1]" src="' . MOD_PUKI_UPLOAD_URL . 'sad.gif" />',
+			'&amp;(heart);'	=> ' <img alt="[$1]" src="' . MOD_PUKI_UPLOAD_URL . 'heart.gif" />',
+			'&amp;(worried);'=>' <img alt="[$1]" src="' . MOD_PUKI_UPLOAD_URL . 'worried.png" />',
+			'\s(\(\^\^\))'	=> ' <img alt="$1" src="' . MOD_PUKI_UPLOAD_URL . 'smile.gif" />',
+			'\s(\(\^-\^)'	=> ' <img alt="$1" src="' . MOD_PUKI_UPLOAD_URL . 'bigsmile.gif" />',
+			'\s(\(\.\.;)'	=> ' <img alt="$1" src="' . MOD_PUKI_UPLOAD_URL . 'oh.gif" />',
+			'\s(\(\^_-\))'	=> ' <img alt="$1" src="' . MOD_PUKI_UPLOAD_URL . 'wink.gif" />',
+			'\s(\(--;)'	=> ' <img alt="$1" src="' . MOD_PUKI_UPLOAD_URL . 'sad.gif" />',
+			'\s(\(\^\^;\))'	=> ' <img alt="$1" src="' . MOD_PUKI_UPLOAD_URL . 'worried.png" />',
 		));
 	}
 ?>
