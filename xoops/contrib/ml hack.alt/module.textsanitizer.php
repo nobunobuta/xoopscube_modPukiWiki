@@ -151,7 +151,7 @@ class MyTextSanitizer
 		$patterns = array();
 		$replacements = array();
 
-		global $xoopsConfig;
+  		global $xoopsConfig;
 
 		$lang_tags = array(
 			'ja' => 'japanese',
@@ -163,13 +163,13 @@ class MyTextSanitizer
 	  		$patterns[] = "/\[".$tag."](.*)\[\/".$tag."\]/sU"; 
 	  		if ($xoopsConfig['language'] == $language) {
 		  		$replacements[] = '\\1';
-	  	} else { 
-	  	$replacements[] = "";
-	  	}
+	  		} else { 
+	  			$replacements[] = "";
+	  		}
 		}
 
-			return preg_replace($patterns, $replacements, $text);
-		}
+		return preg_replace($patterns, $replacements, $text);
+	}
 
 	/**
 	 * Replace XoopsCodes with their equivalent HTML formatting
@@ -192,8 +192,8 @@ class MyTextSanitizer
 			$text =& $this->formatForML($text);
 		} 
 		// End of ML hack by marcan
-
-		//$patterns[] = "/\[code](.*)\[\/code\]/esU";
+		
+        //$patterns[] = "/\[code](.*)\[\/code\]/esU";
 		//$replacements[] = "'<div class=\"xoopsCode\"><code><pre>'.wordwrap(MyTextSanitizer::htmlSpecialChars('\\1'), 100).'</pre></code></div>'";
 		// RMV: added new markup for intrasite url (allows easier site moves)
 		// TODO: automatically convert other URLs to this format if XOOPS_URL matches??
@@ -249,29 +249,6 @@ class MyTextSanitizer
 		$replacements[] = "about :";
 		return preg_replace($patterns, $replacements, $text);
 	}
-//nobunobu for modPukiWiki
-	/**
-	 * Replace PukiWiki with their equivalent HTML formatting
-     *
-	 * @param   string  $text
-     *
-     * @return	string
-	 */
-	function &renderWikistyle(&$text, $xcode=1, $image=1, $br=1)
-	{
-		//modPukiWiki
-		include_once(XOOPS_ROOT_PATH.'/class/modPukiWiki/PukiWiki.php');
-		static $render;
-		if (!is_object($render))
-			$render = &new PukiWikiRender('xoops');
-		$text =& $this->codePreConv($text, $xcode); // Ryuji_edit(2003-11-18)
-		PukiWikiConfig::setParam('line_break',$br);
-		$text = $render->transform($text);
-		// XOOPS Quote style
-		$text = str_replace(array('<blockquote>','</blockquote>'),array(_QUOTEC.'<div class="xoopsQuote"><blockquote>','</blockquote></div>'),$text);
-		return $text;
-	}
-//nobunobu for modPukiWiki END
 
 	/**
 	 * Convert linebreaks to <br /> tags
@@ -353,19 +330,14 @@ class MyTextSanitizer
 	function &displayTarea(&$text, $html = 0, $smiley = 1, $xcode = 1, $image = 1, $br = 1, $formatML = 1)
 	// End of ML Hack by marcan
 	{
+		$text =& $this->codePreConv($text, $xcode); // Ryuji_edit(2003-11-18)
+		$text =& $this->wikiPreConv($text, $xcode); // modPukiWiki Conv by nobunobu
+
 		if ($html != 1) {
 			// html not allowed
-//nobunobu for modPukiWiki
-			if ($xcode) {
-				$text =& $this->renderWikistyle($text, $xcode, $image, $br);
-				$br = 0;
-			} else {
-				$text =& $this->htmlSpecialChars($text);
-			}
-		} else {
-			$text =& $this->codePreConv($text, $xcode); // Ryuji_edit(2003-11-18)
-//nobunobu for modPukiWiki END
+			$text =& $this->htmlSpecialChars($text);
 		}
+
 		$text =& $this->makeClickable($text);
 		if ($smiley != 0) {
 			// process smiley
@@ -379,8 +351,8 @@ class MyTextSanitizer
 				// $text =& $this->xoopsCodeDecode($text);
 				$text =& $this->xoopsCodeDecode($text, 1, $formatML);
 				// End of ML Hack by marcan
-            		} else {
-                		// image not allowed
+			} else {
+				// image not allowed
 				// ML Hack by marcan
 				// $text =& $this->xoopsCodeDecode($text, 0);
 				$text =& $this->xoopsCodeDecode($text, 0, $formatML);
@@ -390,6 +362,7 @@ class MyTextSanitizer
 		if ($br != 0) {
 			$text =& $this->nl2Br($text);
 		}
+		$text =& $this->wikiConv($text, $xcode, $image, $br); // modPukiWiki Conv by nobunobu
 		$text =& $this->codeConv($text, $xcode, $image);	// Ryuji_edit(2003-11-18)
 		return $text;
 	}
@@ -408,18 +381,13 @@ class MyTextSanitizer
 	function &previewTarea(&$text, $html = 0, $smiley = 1, $xcode = 1, $image = 1, $br = 1)
 	{
 		$text =& $this->stripSlashesGPC($text);
+
+		$text =& $this->codePreConv($text, $xcode); // Ryuji_edit(2003-11-18)
+		$text =& $this->wikiPreConv($text, $xcode); // modPukiWiki Conv
+
 		if ($html != 1) {
 			// html not allowed
-//nobunobu for modPukiWiki
-			if ($xcode) {
-				$text =& $this->renderWikistyle($text, $xcode, $image, $br);
-			    $br = 0;
-		    } else {
-				$text =& $this->htmlSpecialChars($text);
-			}
-		} else {
-			$text =& $this->codePreConv($text, $xcode); // Ryuji_edit(2003-11-18)
-//nobunobu for modPukiWiki END
+			$text =& $this->htmlSpecialChars($text);
 		}
 		$text =& $this->makeClickable($text);
 		if ($smiley != 0) {
@@ -439,6 +407,7 @@ class MyTextSanitizer
 		if ($br != 0) {
 			$text =& $this->nl2Br($text);
 		}
+		$text =& $this->wikiConv($text, $xcode, $image, $br); // modPukiWiki Conv by nobunobu
 		$text =& $this->codeConv($text, $xcode, $image);	// Ryuji_edit(2003-11-18)
 		return $text;
 	}
@@ -461,23 +430,59 @@ class MyTextSanitizer
 			$replacement = $this->censorConf['censor_replace'];
 			foreach ($this->censorConf['censor_words'] as $bad) {
 				if ( !empty($bad) ) {
-	 				$bad = quotemeta($bad);
-					$patterns[] = "/(\s)".$bad."/siU";
-					$replacements[] = "\\1".$replacement;
-					$patterns[] = "/^".$bad."/siU";
-					$replacements[] = $replacement;
-					$patterns[] = "/(\n)".$bad."/siU";
-					$replacements[] = "\\1".$replacement;
-					$patterns[] = "/]".$bad."/siU";
-					$replacements[] = "]".$replacement;
-					$text = preg_replace($patterns, $replacements, $text);
+				$bad = quotemeta($bad);
+				$patterns[] = "/(\s)".$bad."/siU";
+				$replacements[] = "\\1".$replacement;
+				$patterns[] = "/^".$bad."/siU";
+				$replacements[] = $replacement;
+				$patterns[] = "/(\n)".$bad."/siU";
+				$replacements[] = "\\1".$replacement;
+				$patterns[] = "/]".$bad."/siU";
+				$replacements[] = "]".$replacement;
+				$text = preg_replace($patterns, $replacements, $text);
 				}
    			}
 		}
    		return $text;
 	}
 
+	/**#@+
+	 * Processing modPukiWiki [wiki] tag
+	 */
+	 
+	function wikiPreConv($text, $xcode = 1) {
+		if($xcode != 0){
+			$patterns = "/\[wiki](.*)\[\/wiki\]/esU";
+			$replacements = "'[wiki]'.base64_encode('$1').'[/wiki]'";
+			$text =  preg_replace($patterns, $replacements, $text);
+		}
+		return $text;
+	}
 
+    function wikiConv($text, $xcode = 1, $image = 1, $br = 1) {
+		if($xcode != 0){
+			$patterns = "/\[wiki](.*)\[\/wiki\]/esU";
+			$replacements = "MyTextSanitizer::wikiElementConv('$1','$br')";
+			$text =  preg_replace($patterns, $replacements, $text);
+		}
+		return $text;
+    }
+
+    function wikiElementConv($text, $br=1) {
+		include_once(XOOPS_ROOT_PATH.'/class/modPukiWiki/PukiWiki.php');
+		static $render;
+		if (!is_object($render))
+			$render = &new PukiWikiRender('xoops_2');
+		if ($br) {
+			PukiWikiConfig::setParam('line_break', 1);
+		} else {
+			PukiWikiConfig::setParam('line_break', 0);
+		}
+		$text = $render->transform(str_replace('\"', '"', base64_decode($text)));
+		// XOOPS Quote style
+		$text = str_replace(array('<blockquote>','</blockquote>'),array(_QUOTEC.'<div class="xoopsQuote"><blockquote>','</blockquote></div>'),$text);
+		return $text;
+    }
 	/**#@+
 	 * Sanitizing of [code] tag
 	 */
@@ -485,15 +490,6 @@ class MyTextSanitizer
 		if($xcode != 0){
 			$patterns = "/\[code](.*)\[\/code\]/esU";
 			$replacements = "'[code]'.base64_encode('$1').'[/code]'";
-			$text =  preg_replace($patterns, $replacements, $text);
-		}
-		return $text;
-	}
-
-	function codePostConv($text, $xcode = 1) {
-		if($xcode != 0){
-			$patterns = "/\[code](.*)\[\/code\]/esU";
-			$replacements = "'[code]'.base64_decode('$1').'[/code]'";
 			$text =  preg_replace($patterns, $replacements, $text);
 		}
 		return $text;
@@ -676,4 +672,5 @@ class MyTextSanitizer
 	}
     /**#@-*/
 }
+
 ?>

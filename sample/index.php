@@ -49,7 +49,7 @@ echo $render->transform($text);
 
 <?php
 function get_sample_wiki() {
-$text = <<< EOD
+$text = <<<EOD
 ***ヘッディング
  *ヘッディング１
  文章１
