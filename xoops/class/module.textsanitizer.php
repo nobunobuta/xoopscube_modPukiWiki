@@ -202,7 +202,7 @@ class MyTextSanitizer
 		$replacements[] = "about :";
 		return preg_replace($patterns, $replacements, $text);
 	}
-//nobunobu for modPukiWiki
+//nobunobu for modPukiWiki based on nao-pon's Hack
 	/**
 	 * Replace PukiWiki with their equivalent HTML formatting
      *
@@ -210,16 +210,37 @@ class MyTextSanitizer
      *
      * @return	string
 	 */
-	function &renderWikistyle(&$text)
+	function &renderWikistyle(&$text) 
 	{
 		//modPukiWiki
 		include_once(XOOPS_ROOT_PATH.'/class/modPukiWiki/PukiWiki.php');
 		static $render;
 		if (!is_object($render))
-			$render = &new PukiWikiRender;
-		PukiWikiConfig::SetParam('autourllink',0);
-		PukiWikiConfig::setParam('line_break',1);
-		return $render->transform($text);
+			$render = &new PukiWikiRender('xoops');
+		//[code][/code]‚Æ‚Ì‹¤‘¶‚ğ‹–‚·‚½‚ß‚Ì’²®
+		$texts = preg_split("/\[code].*\[\/code\]/sU",$text);
+		preg_match_all("/\[code].*\[\/code\]/sU",$text,$match,PREG_PATTERN_ORDER);
+		$ret = "";
+		$i=0;
+		$count = count($match[0]);
+		foreach($texts as $block)
+		{
+			if ($i < $count)
+				$ret .= $block."\n\n_____cODe_".$i."_____\n\n";
+			else
+				$ret .= $block;
+			$i++;
+		}
+		$ret = $render->transform($ret);
+		$i -= 2 ;
+		while($i >= 0)
+		{
+			$ret = str_replace("_____cODe_".$i."_____",$match[0][$i],$ret);
+			$i--;
+		}
+		// XOOPS Quote style‚É’u‚«Š·‚¦
+		$ret = str_replace(array('<blockquote>','</blockquote>'),array(_QUOTEC.'<div class="xoopsQuote"><blockquote>','</blockquote></div>'),$ret);
+		return $ret;
 	}
 //nobunobu for modPukiWiki END
 
