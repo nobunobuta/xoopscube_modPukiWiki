@@ -43,14 +43,15 @@ remove_filter('the_excerpt', 'convert_gmcode');
 remove_filter('the_excerpt', 'convert_smilies');
 remove_filter('the_excerpt', 'convert_chars');
 
-remove_filter('comment_text', 'wpautop');
+remove_filter('comment_text', 'wpautop',30);
 remove_filter('comment_text', 'wptexturize');
 remove_filter('comment_text', 'wp_filter_kses');
 remove_filter('comment_text', 'convert_bbcode');
 remove_filter('comment_text', 'convert_gmcode');
 remove_filter('comment_text', 'balanceTags');
-remove_filter('comment_text', 'convert_smilies');
+remove_filter('comment_text', 'convert_smilies',20);
 remove_filter('comment_text', 'convert_chars');
+remove_filter('comment_text', 'make_clickable');
 
 add_filter('the_content', 'pukiwiki', 6);
 add_filter('the_excerpt', 'pukiwiki', 6);
