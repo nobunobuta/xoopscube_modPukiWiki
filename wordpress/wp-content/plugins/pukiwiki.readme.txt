@@ -3,7 +3,9 @@ WordPress用のPukiWikiレンダープラグインです。
 [導入方法］
 １．pukiwiki.phpをwp-content/pluginsにコピーする。
 ２．wp-content/plugins下にmodPukiWikiディレクトリを丸ごとコピーする
-３．WordPressのPlugin設定画面で、pukiwikiを有効にする。
+３．必要であれば、pukiwiki.php内のコメントアウトされたオプション設定を有効にしたり、
+　　mdoPukiWiki用の設定を変更する
+４．WordPressのPlugin設定画面で、pukiwikiを有効にする。
 
 導入後のディレクトリツリーイメージ
 -WordPressディレクトリ

@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: PukiWiki
-Version: 0.1
+Version: 0.3
 Plugin URI: http://www.kowa.org/
 Description:PukiWiki Render
 Author: nobunobu
@@ -17,6 +17,10 @@ function pukiwiki($text) {
 	
 
 	$render = &new PukiWikiRender;
+// PukiWikiMod‚âB-Wiki‚Ö‚ÌAutoLink‚ğ—LŒø‚É‚·‚é
+	//PukiWikiConfig::setParam("autolink",3);
+// WordPress‹L–‚Ö‚ÌInterWikiName‚ğ’è‹`‚·‚é
+	//PukiWikiConfig::addInterWiki('['.XOOPS_URL.'/modules/wordpress/index.php? WordPress]');
 	$retstr = $render->transform($text);
 	unset($render);
 	return $retstr;
