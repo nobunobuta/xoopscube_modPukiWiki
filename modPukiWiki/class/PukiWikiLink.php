@@ -20,32 +20,18 @@ class PukiWikiInlineConverter
 		
 		if ($converters === NULL)
 		{
-			if (PukiWikiConfig::GetParam('autourllink')) {
-				$converters = array(
-					'plugin',        // インラインプラグイン
-					'note',          // 注釈
-					'url',           // URL
-					'url_interwiki', // URL (interwiki definition)
-					'mailto',        // mailto:
-					'interwikiname', // InterWikiName
-					'autolink',      // AutoLink
-					'bracketname',   // BracketName
-					'wikiname',      // WikiName
-					'autolink_a',    // AutoLink(アルファベット)
-				);
-			} else {
-				$converters = array(
-					'plugin',        // インラインプラグイン
-					'note',          // 注釈
-					'url_interwiki', // URL (interwiki definition)
-					'mailto',        // mailto:
-					'interwikiname', // InterWikiName
-					'autolink',      // AutoLink
-					'bracketname',   // BracketName
-					'wikiname',      // WikiName
-					'autolink_a',    // AutoLink(アルファベット)
-				);
-			}
+			$converters = array(
+				'plugin',        // インラインプラグイン
+				'note',          // 注釈
+				'url',           // URL
+				'url_interwiki', // URL (interwiki definition)
+				'mailto',        // mailto:
+				'interwikiname', // InterWikiName
+				'autolink',      // AutoLink
+				'bracketname',   // BracketName
+				'wikiname',      // WikiName
+				'autolink_a',    // AutoLink(アルファベット)
+			);
 		}
 		if ($excludes !== NULL)
 		{
@@ -315,29 +301,51 @@ class PukiWikiLink_url extends PukiWikiLink
 	function get_pattern()
 	{
 		$s1 = $this->start + 1;
+		if (PukiWikiConfig::GetParam('autourllink')) {
 		return <<<EOD
 (\[\[             # (1) open bracket
  ((?:(?!\]\]).)+) # (2) alias
- (?:>|:)
+ (>|:)            # (3) separator
 )?
-(                 # (3) url
+(                 # (4) url
  (?:https?|ftp|news):\/\/[!~*'();\/?:\@&=+\$,%#\w.-]+
 )
 (?($s1)\]\])      # close bracket
 EOD;
+		} else {
+		return <<<EOD
+(\[\[             # (1) open bracket
+ ((?:(?!\]\]).)+) # (2) alias
+ (>|:)            # (3) separator
+)
+(                 # (4) url
+ (?:https?|ftp|news):\/\/[!~*'();\/?:\@&=+\$,%#\w.-]+
+)
+(?($s1)\]\])      # close bracket
+EOD;
+		}
 	}
 	function get_count()
 	{
-		return 3;
+		return 4;
 	}
 	function set($arr,$page)
 	{
-		list(,,$alias,$name) = $this->splice($arr);
+		list(,,$alias,$separator,$name) = $this->splice($arr);
+		$this->separator = $separator;
 		return parent::setParam($page,htmlspecialchars($name),'','url',$alias == '' ? $name : $alias);
 	}
 	function toString()
 	{
-		return "<a href=\"{$this->name}\">{$this->alias}</a>";
+		if ($this->separator == ">")
+			return "<a href=\"{$this->name}\">{$this->alias}</a>";
+		else
+		{
+			$target = "";
+			if ($target = PukiWikiConfig::getParam('link_target'))
+				$target = " target=\"{$target}\"";
+			return "<a href=\"{$this->name}\"{$target}>{$this->alias}</a>";
+		}
 	}
 }
 // url (InterWiki definition type)
@@ -385,6 +393,7 @@ class PukiWikiLink_mailto extends PukiWikiLink
 	function get_pattern()
 	{
 		$s1 = $this->start + 1;
+		if (PukiWikiConfig::GetParam('autourllink')) {
 		return <<<EOD
 (?:
  \[\[
@@ -393,6 +402,16 @@ class PukiWikiLink_mailto extends PukiWikiLink
 ([\w.-]+@[\w-]+\.[\w.-]+) # (2) mailto
 (?($s1)\]\])              # close bracket if (1)
 EOD;
+		} else {
+		return <<<EOD
+(?:
+ \[\[
+ ((?:(?!\]\]).)+)(?:>|:)  # (1) alias
+)
+([\w.-]+@[\w-]+\.[\w.-]+) # (2) mailto
+(?($s1)\]\])              # close bracket if (1)
+EOD;
+		}
 	}
 	function get_count()
 	{
