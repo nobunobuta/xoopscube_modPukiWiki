@@ -201,6 +201,52 @@ function plugin_ref_body($name,$args,$params){
 		$l_url = $url;
 		$icon = REF_FILE_ICON;
 		if (preg_match('/([^\/]+)$/', $name, $match)) { $ext = $match[1]; }
+	} else {
+		$page = '';
+		if (count($args) > 0) {
+			$_page = $args[0];
+			if (PukiWikiFunc::is_page($_page)) {
+				$page = $_page;
+				array_shift($args);
+			}
+		}
+		//相対パスからフルパスを得る
+		if (preg_match('/^(.+)\/([^\/]+)$/',$name,$matches))
+		{
+			if ($matches[1] == '.' or $matches[1] == '..')
+			{
+				$matches[1] .= '/';
+			}
+			$page = PukiWikiFunc::add_bracket($matches[1]);
+			$name = $matches[2];
+		}
+		$ext = $name;
+		if (MOD_PUKI_WIKI_VER=='1.3') $page=PukiWikiFunc::add_bracket(PukiWikiFunc::strip_bracket($page));
+		$file = MOD_PUKI_WIKI_UPLOAD_DIR.PukiWikiFunc::encode($page).'_'.PukiWikiFunc::encode($name);
+		if (!is_file($file)) {
+			if (!PukiWikiFunc::is_page($page)) { 
+				$rets['_error'] = 'page not found.';
+				return $rets;
+			} else {
+				$rets['_error'] = 'not found.';
+				return $rets;
+			}
+		}
+		$l_url = MOD_PUKI_WIKI_URL.'?plugin=attach&amp;openfile='.rawurlencode($name).'&amp;refer='.rawurlencode($page);
+		$fsize = sprintf('%01.1f',round(filesize($file)/1000,1)).'KB';
+
+		$is_picture = is_picture($file,$page);
+		$is_flash = ($is_picture)? false : plugin_ref_is_flash($file);
+
+		if ($is_picture) {
+			$url = $file;
+			$size = getimagesize($file);
+			$org_w = $size[0];
+			$org_h = $size[1];
+		} else {
+			$lastmod = date('Y/m/d H:i:s',filemtime($file));
+			$info = "$lastmod $fsize";
+		}
 	}
 
 	//タイトルを決定
