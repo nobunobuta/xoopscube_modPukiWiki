@@ -120,7 +120,7 @@ function & Factory_PukiWikiYTable(& $root, $text)
 
 function & Factory_PukiWikiDiv(& $root, $text)
 {
-	if (! preg_match("/^\#([^\(]+)(?:\((.*)\))?/", $text, $out) || ! exist_plugin_convert($out[1])) {
+	if (! preg_match("/^\#([^\(]+)(?:\((.*)\))?/", $text, $out) || ! PukiWikiPlugin::exist_plugin_convert($out[1])) {
 		return new PukiWikiParagraph($text);
 	} else {
 		return new PukiWikiDiv($out);
