@@ -870,13 +870,15 @@ class PukiWikiTable extends PukiWikiElement
 			$this->table_sheet .= "margin-left:auto;margin-right:auto;";
 			$this->table_around = "";
 		}
-		if (preg_match("/T(LEFT|CENTER|RIGHT)?:([0-9]+[%]?)/i",$string,$reg)) {
+//		echo "TABLE2: $string<br>\n";
+		if (preg_match("/[^F]T(LEFT|CENTER|RIGHT)?:([0-9]+[%]?)/i",$string,$reg)) {
 			if (array_key_exists (2,$reg)) {
 				if (!strpos($reg[2],"%")) $reg[2] .= "px";
 				$this->table_sheet .= "width:".$reg[2].";";
 			}
 		}
-		$string = preg_replace("/^(TLEFT|TCENTER|TRIGHT|T):([0-9]+[%]?)?/i","",$string);
+		$string = preg_replace("/(TLEFT|TCENTER|TRIGHT|([^F])T):([0-9]+[%]?)?/i","",$string);
+//		echo "TABLE2: $string<br>\n";
 		return $string;
 	}
 }
