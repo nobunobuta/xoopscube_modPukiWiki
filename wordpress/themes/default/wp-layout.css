@@ -1,0 +1,424 @@
+/* Default WordPress by Dave Shea || http://mezzoblue.com
+	Modifications by Matthew Mullenweg || http://photomatt.net
+	This is just a basic layout, with only the bare minimum defined.
+	Please tweak this and make it your own. :)
+ÈþÆý
+*/
+#wpMainContent {
+	padding-right: 5px;
+}
+
+#wpMainContent h2 {
+	font-size : 18px;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;;
+	border-bottom: 1px solid #dcdcdc;
+	margin-bottom: 5px;
+}
+
+#wpMainContent h3 {
+	font-size : 16px;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+	margin-bottom: 5px;
+}
+
+#wpMainContent a {
+	color: #9B9FAE;
+}
+
+#wpMainContent a img {
+	border: none;
+}
+
+#wpMainContent a:visited {
+	color: #9B9FAE;
+}
+
+#wpMainContent a:hover {
+	color: #7AA0CF;
+}
+
+#wpMainContent acronym,#wpMainContent abbr {
+	border-bottom: 1px dashed #333;
+}
+
+#wpMainContent acronym,#wpMainContent abbr,#wpMainContent span.caps {
+	cursor: help;
+	font-size: 90%;
+	letter-spacing: .07em;
+}
+#wpMainContent blockquote {
+	border-left: 5px solid #ccc;
+	margin-left: 1.5em;
+	padding-left: 5px;
+}
+#wpMainContent cite {
+	font-size: 90%;
+	font-style: normal;
+}
+
+#wpMainContent ol#comments li p {
+	font-size: 100%;
+}
+
+#wpMainContent p, li, .feedback {
+	font: 90%/175% "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+}
+#wpMainContent .storycontent{
+	font: 100% "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+}
+
+#wpMainContent div.storycontent {
+	clear:right;
+}
+
+#wpMainContent .credit {
+	background: #ffffff;
+	color: #666666;
+	font-size: 11px;
+	margin: 10px 0 0 0;
+	padding: 3px;
+	text-align: center;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+}
+
+#wpMainContent .credit a:link, #wpMainContent .credit a:hover {
+	color: #9B9FAE;
+}
+
+#wpMainContent .feedback {
+	color: #ccc;
+	text-align: right;
+}
+
+#wpMainContent .meta {
+	font-size: .75em;
+}
+
+#wpMainContent .meta, .meta a {
+	color: #808080;
+	font-weight: normal;
+	letter-spacing: 0;
+}
+#wpMainContent .meta ul {
+	display: inline;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+#wpMainContent .meta li {
+	display: inline;
+}
+
+#wpMainContent .storytitle {
+	margin: 0;
+}
+
+#wpMainContent .storytitle a {
+	text-decoration: none;
+}
+
+#wpMainContent #commentform input,#wpMainContent #commentform textarea {
+	background: #fff;
+	border: 1px solid #333;
+}
+
+
+#wpMainContent em {
+	color: #999999;
+}
+
+#wpMainContent ul.post-meta { 
+       list-style: none; 
+} 
+
+#wpMainContent ul.post-meta li { 
+       display: inline; 
+} 
+
+#wpMainContent ul.post-meta span.post-meta-key { 
+       font-weight: bold; 
+} 
+/*
+ * modPukiWikiÍÑ¤Î¥¹¥¿¥¤¥ë¥·¡¼¥È¥µ¥ó¥×¥ë
+ */
+div.modPukiWP_ie5 {
+	text-align:left;
+}
+
+.modPukiWP_style_table
+{
+	padding:0px;
+	border:0px;
+	margin:2px 0px 2px 0px;
+	text-align:left;
+	color:inherit;
+	width:auto;
+	background-color:#ccd5dd;
+}
+
+.modPukiWP_style_th
+{
+	padding:5px;
+	margin:1px;
+	text-align:center;
+	color:inherit;
+	background-color:#EEEEEE;
+}
+
+thead th.modPukiWP_style_th,
+tfoot th.modPukiWP_style_th
+{
+	color:inherit;
+	background-color:#E0E8F0;
+}
+
+.modPukiWP_style_td
+{
+	padding:5px;
+	margin:1px;
+	color:inherit;
+	background-color:#EEF5FF;
+}
+
+thead td.modPukiWP_style_td,
+tfoot td.modPukiWP_style_td
+{
+	color:inherit;
+	background-color:#D0D8E0;
+}
+h1.modPukiWP_head {
+	font-size : 20pt;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+	border-left: 10px solid #dcdcdc;
+	border-bottom: 1px solid #dcdcdc;
+	background-color:#FEFEFE;
+	padding-left: 0.3em;
+	margin-left: 0px;
+	margin-bottom: 5px;
+}
+h2.modPukiWP_head {
+	font-size : 16pt;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+	border-left: 10px solid #dcdcdc;
+	border-bottom: 1px solid #dcdcdc;
+	background-color:#FEFEFE;
+	padding-left: 0.3em;
+	margin-left: 0px;
+	margin-bottom: 5px;
+}
+h3.modPukiWP_head {
+	font-size : 12pt;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+	border-left: 10px solid #dcdcdc;
+	border-bottom: 1px solid #dcdcdc;
+	background-color:#FEFEFE;
+	padding-left: 0.3em;
+	margin-left: 0px;
+	margin-bottom: 5px;
+}
+
+h4.modPukiWP_head {
+	font-size : 11pt;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+	border-left: 10px solid #dcdcdc;
+	border-bottom: 1px solid #dcdcdc;
+	background-color:#FEFEFE;
+	padding-left: 0.3em;
+	margin-left: 0px;
+	margin-bottom: 5px;
+}
+
+h5.modPukiWP_head {
+	font-size : 10pt;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+	background-color: #DDEEFF;
+	padding: 0px;
+	margin-left: 0px;
+}
+
+h6.modPukiWP_head {
+	font-size : 9pt;
+	font-family: "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", Osaka, Verdana, "£Í£Ó £Ð¥´¥·¥Ã¥¯", sans-serif;
+	background-color: #DDEEFF;
+	padding: 0px;
+	margin-left: 0px;
+}
+
+ul.modPukiWP_list1 li
+{
+	list-style-type:disc;
+}
+ul.modPukiWP_list2 li
+{
+	list-style-type:circle;
+}
+ul.modPukiWP_list3 li
+{
+	list-style-type:square;
+}
+ol.modPukiWP_list1 li
+{
+	list-style-type:decimal;
+}
+ol.modPukiWP_list2 li
+{
+	list-style-type:lower-roman;
+}
+ol.modPukiWP_list3 li
+{
+	list-style-type:lower-alpha;
+}
+
+pre.modPukiWP_pre {
+	border-top:    #DDDDEE 1px solid;
+	border-bottom: #888899 1px solid;
+	border-left:   #DDDDEE 1px solid;
+	border-right:  #888899 1px solid;
+	font-size:12px;
+	line-height:14px;
+	padding:5px 10px 5px 10px;
+	margin: 5px 10px 5px 20px;
+	white-space: pre;
+	width:95ex;
+	max-width:95ex;
+	max-height:20ex;
+	background-color: #F0F8FF;
+	color: black;
+	line-break:strict;
+	word-wrap:break-word; /* IEÂÐºö */
+	word-break:break-all; /* IEÂÐºö */
+	overflow:auto; /* Moziila/OperaÂÐºö */
+}
+
+span.modPukiWP_noexists
+{
+	color:inherit;
+	background-color:#FFFACC;
+}
+
+.modPukiWP_small
+{
+	font-size:80%;
+}
+
+
+a.modPukiWP_note_super
+{
+	color:#DD3333;
+	background-color:inherit;
+	font-weight:bold;
+	font-size:60%;
+	vertical-align:super;
+}
+
+hr.modPukiWP_full_hr
+{
+	border-style:ridge;
+	border-color:#333333;
+	border-width:1px 0px;
+}
+hr.modPukiWP_note_hr
+{
+	width:90%;
+	border-style:ridge;
+	border-color:#333333;
+	border-width:1px 0px;
+	text-align:center;
+	margin:1em auto 0em auto;
+}
+
+span.modPukiWP_size1
+{
+	font-size:xx-small;
+	line-height:130%;
+	text-indent:0px;
+	display:inline;
+}
+span.modPukiWP_size2
+{
+	font-size:x-small;
+	line-height:130%;
+	text-indent:0px;
+	display:inline;
+}
+span.modPukiWP_size3
+{
+	font-size:small;
+	line-height:130%;
+	text-indent:0px;
+	display:inline;
+}
+span.modPukiWP_size4
+{
+	font-size:medium;
+	line-height:130%;
+	text-indent:0px;
+	display:inline;
+}
+span.modPukiWP_size5
+{
+	font-size:large;
+	line-height:130%;
+	text-indent:0px;
+	display:inline;
+}
+span.modPukiWP_size6
+{
+	font-size:x-large;
+	line-height:130%;
+	text-indent:0px;
+	display:inline;
+}
+span.modPukiWP_size7
+{
+	font-size:xx-large;
+	line-height:130%;
+	text-indent:0px;
+	display:inline;
+}
+
+.modPukiWP_quotation {
+}
+
+/* aname.inc.php */
+.modPukiWP_anchor
+{
+}
+.modPukiWP_anchor_super
+{
+	font-size:xx-small;
+	vertical-align:super;
+}
+
+/* br.inc.php */
+br.modPukiWP_spacer
+{
+}
+
+/* clear.inc.php */
+.modPukiWP_clear{
+	margin:0px;
+	clear:both;
+}
+
+/* recent.inc.php,showrss.inc.php */
+ul.modPukiWP_recent_list
+{
+/*
+	padding:0px;
+	border:0px;
+	margin:0px 0px 0px 1em;
+	word-wrap:break-word;
+	word-break:break-all;
+*/
+}
+
+/* ref.inc.php */
+div.modPukiWP_img_margin
+{
+	margin-left:32px;
+	margin-right:32px;
+}
+
+
