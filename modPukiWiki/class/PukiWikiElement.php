@@ -164,10 +164,11 @@ class PukiWikiHeading extends PukiWikiElement
 	{
 		parent::PukiWikiElement();
 		
-		$this->level = min(3, strspn($text, '*'));
+		$this->level = min(6, strspn($text, '*'));
+//		echo $this->level;
 		list($text, $this->msg_top, $this->id) = $root->getAnchor($text, $this->level);
 		$this->insert(new PukiWikiInline($text));
-		$this->level++; // h2,h3,h4
+//		$this->level++; // h2,h3,h4
 	}
 
 	function &insert(&$obj)
@@ -428,29 +429,32 @@ class PukiWikiTableCell extends PukiWikiElement
 	{
 		parent::PukiWikiElement();
 		$this->style = $matches = array();
-	
-		while (preg_match('/^(?:(LEFT|CENTER|RIGHT)|(BG)?COLOR\(([#\w]+)\)|SIZE\((\d+)\)):(.*)$/',$text,$matches))
-		{
-			if ($matches[1])
+		if (!PukiWikiConfig::getParam("ExtTable")) {
+			while (preg_match('/^(?:(LEFT|CENTER|RIGHT)|(BG)?COLOR\(([#\w]+)\)|SIZE\((\d+)\)):(.*)$/',$text,$matches))
 			{
-				$this->style['align'] = 'text-align:'.strtolower($matches[1]).';';
-				$text = $matches[5];
+				if ($matches[1])
+				{
+					$this->style['align'] = 'text-align:'.strtolower($matches[1]).';';
+					$text = $matches[5];
+				}
+				else if ($matches[3])
+				{
+					$name = $matches[2] ? 'background-color' : 'color';
+					$this->style[$name] = $name.':'.htmlspecialchars($matches[3]).';';
+					$text = $matches[5];
+				}
+				else if ($matches[4])
+				{
+					$this->style['size'] = 'font-size:'.htmlspecialchars($matches[4]).'px;';
+					$text = $matches[5];
+				}
 			}
-			else if ($matches[3])
+			if ($is_template and is_numeric($text))
 			{
-				$name = $matches[2] ? 'background-color' : 'color';
-				$this->style[$name] = $name.':'.htmlspecialchars($matches[3]).';';
-				$text = $matches[5];
+				$this->style['width'] = "width:{$text}px;";
 			}
-			else if ($matches[4])
-			{
-				$this->style['size'] = 'font-size:'.htmlspecialchars($matches[4]).'px;';
-				$text = $matches[5];
-			}
-		}
-		if ($is_template and is_numeric($text))
-		{
-			$this->style['width'] = "width:{$text}px;";
+		} else {
+			$text = $this->get_cell_style($text);
 		}
 		if ($text == '>')
 		{
@@ -473,6 +477,16 @@ class PukiWikiTableCell extends PukiWikiElement
 			{
 				$obj = &$obj->elements[0];
 			}
+		}
+		else if (preg_match("/\n/", $text,$match) and PukiWikiConfig::getParam("ExtTable"))
+		{
+//			echo $string."<br>\n";
+			$string = preg_replace("/(^|\n)(\|[^\r]+?\|)(\n[^|]|$)/e","'$1'.stripslashes(str_replace('->\n','___td_br___','$2')).'$3'",$text);
+//			echo $string."<br>\n";
+			$lines=array();
+			$lines = explode("\n", $string);
+			$obj = &new PukiWikiBody(2);
+			$obj->parse($lines);
 		}
 		else
 		{
@@ -515,6 +529,88 @@ class PukiWikiTableCell extends PukiWikiElement
 		
 		return $this->wrap(parent::toString(), $this->tag, $param, FALSE);
 	}
+	
+	function get_cell_style($string) {
+		$cells = explode('|',$string,2);
+//		echo "CELL: {$cells[0]}\n";
+		$colors_reg = "aqua|navy|black|olive|blue|purple|fuchsia|red|gray|silver|green|teal|lime|white|maroon|yellow|transparent";
+		if (preg_match("/FC:(#?[0-9abcdef]{6}?|$colors_reg|0)/i",$cells[0],$tmp)) {
+			if ($tmp[1]==="0") $tmp[1]="transparent";
+			$this->style['fcolor'] = "color:".$tmp[1].";";
+			$cells[0] = preg_replace("/FC:(#?[0-9abcdef]{6}?|$colors_reg|0)(\(([^),]*)(,no|,one|,1)?\))/i","FC:$2",$cells[0]);
+			$cells[0] = preg_replace("/FC:(#?[0-9abcdef]{6}?|$colors_reg|0)/i","",$cells[0]);
+		}
+		// セル規定背景色指定
+		if (preg_match("/(?:SC|BC):(#?[0-9abcdef]{6}?|$colors_reg|0)/i",$cells[0],$tmp)) {
+			if ($tmp[1]==="0") $tmp[1]="transparent";
+			$this->style['color'] = "background-color:".$tmp[1].";";
+			$cells[0] = preg_replace("/(?:SC|BC):(#?[0-9abcdef]{6}?|$colors_reg|0)(\(([^),]*)(,no|,one|,1)?\))/i","BC:$2",$cells[0]);
+			$cells[0] = preg_replace("/(?:SC|BC):(#?[0-9abcdef]{6}?|$colors_reg|0)/i","",$cells[0]);
+		}
+		// セル規定背景画指定
+		if (preg_match("/(?:SC|BC):\(([^),]*)(,once|,1)?\)/i",$cells[0],$tmp)) {
+			$tmp[1] = str_replace("http","HTTP",$tmp[1]);
+			$this->style['color'] .= "background-image: url(".$tmp[1].");";
+			if ($tmp[2]) $this->style['color'] .= "background-repeat: no-repeat;";
+			$cells[0] = preg_replace("/(?:SC|BC):\(([^),]*)(,once|,1)?\)/i","",$cells[0]);
+		}
+		if (preg_match("/K:([0-9]+),?([0-9]*)(one|two|boko|deko|in|out|dash|dott)?/i",$cells[0],$tmp)) {
+			if (!empty($tmp[3])) {
+				if (preg_match("/one/i",$tmp[3])) $border_type = "solid";
+				else if (preg_match("/two/i",$tmp[3])) $border_type = "double";
+				else if (preg_match("/boko/i",$tmp[3])) $border_type = "groove";
+				else if (preg_match("/deko/i",$tmp[3])) $border_type = "ridge";
+				else if (preg_match("/in/i",$tmp[3])) $border_type = "inset";
+				else if (preg_match("/out/i",$tmp[3])) $border_type = "outset";
+				else if (preg_match("/dash/i",$tmp[3])) $border_type = "dashed";
+				else if (preg_match("/dott/i",$tmp[3])) $border_type = "dotted";
+			} else {
+				$border_type = "outset";
+			}
+			//$this->table_style .= " border=\"".$tmp[1]."\"";
+			if (!empty($tmp[1])) {
+				if ($tmp[1]==="0"){
+					$this->style['border'] = "border:none;";
+				} else {
+					$this->style['border'] = "border:".$border_type." ".$tmp[1]."px;";
+				}
+			}
+			if (!empty($tmp[2])) {
+				if ($reg[2]!=""){
+					$this->style['padding'] .= " padding:".$reg[2].";";
+				} else {
+					$this->style['padding'] .= " padding:5px;";
+				}
+			}
+			$cells[0] = preg_replace("/K:([0-9]+),?([0-9]*)(one|two|boko|deko|in|out|dash|dott)?/i","",$cells[0]);
+		} else {
+//			$this->style['border'] = "border:none;";
+		}
+		// ボーダー色指定
+		if (preg_match("/KC:(#?[0-9abcdef]{6}?|$colors_reg|0)/i",$cells[0],$tmp)) {
+			$this->style['border-color'] = "border-color:".$tmp[1].";";
+			$cells[0] = preg_replace("/KC:(#?[0-9abcdef]{6}?|$colors_reg)/i","",$cells[0]);
+		}
+		// セル規定文字揃え、幅指定
+		if (preg_match("/(LEFT|CENTER|RIGHT)?:(TOP|MIDDLE|BOTTOM)?(?::)?([0-9]+[%]?)?/i",$cells[0],$tmp)) {
+			if (!empty($tmp[3])) {
+				if ($tmp[3]) {
+					if (!strpos($tmp[3],"%")) $tmp[3] .= "px";
+					$this->style['width'] = "width:".$tmp[3].";";
+				}
+			}
+			if (!empty($tmp[1])) {
+				if ($tmp[1]) $this->style['align'] = "text-align:".strtolower($tmp[1]).";";
+			}
+			if (!empty($tmp[2])) {
+				if ($tmp[2]) $this->style['valign'] = "vertical-align:".strtolower($tmp[2]).";";
+			}
+			$cells[0] = preg_replace("/(LEFT|CENTER|RIGHT)?:(TOP|MIDDLE|BOTTOM)?(?::)?([0-9]+[%]?)?/i","",$cells[0]);
+		}
+//		echo "CELL2: {$cells[0]}<br>\n";
+//		var_dump($this->style);
+		return implode('|',$cells);
+	}
 }
 
 class PukiWikiTable extends PukiWikiElement
@@ -522,12 +618,15 @@ class PukiWikiTable extends PukiWikiElement
 	var $type;
 	var $types;
 	var $col; // number of column
+	var $table_around,$table_sheet,$table_style,$div_style,$table_align;
+	
 	
 	function PukiWikiTable( &$root, $text)
 	{
 		parent::PukiWikiElement();
 		
 		$out = array();
+//		echo $text."<br/>\n";
 		if (!preg_match("/^\|(.+)\|([hHfFcC]?)$/", $text, $out))
 		{
 			$this = new PukiWikiInline($text);
@@ -535,7 +634,16 @@ class PukiWikiTable extends PukiWikiElement
 			
 			return;
 		}
-		$cells = explode('|', $out[1]);
+		if (PukiWikiConfig::getParam("ExtTable")) {
+//			echo $out[1]."\n";
+			$cells = $this->table_inc_add(explode('|', $out[1]));
+			if (strtolower($out[2])=='c') {
+				$cells[0] = $this->get_table_style($cells[0]);
+			}
+//			var_dump($cells);
+		} else {
+			$cells = explode('|', $out[1]);
+		}
 		$this->col = count($cells);
 		$this->type = strtolower($out[2]);
 		$this->types = array($this->type);
@@ -635,8 +743,125 @@ class PukiWikiTable extends PukiWikiElement
 			}
 			$string .= $this->wrap($part_string, $part);
 		}
-		$string = $this->wrap($string, 'table', ' class="'.PukiWikiConfig::getParam('style_prefix').'style_table" cellspacing="1" border="0"');
-		return $this->wrap($string, 'div', ' class="'.PukiWikiConfig::getParam('style_prefix').'ie5"');
+		$string = $this->wrap($string, 'table', ' class="'.PukiWikiConfig::getParam('style_prefix').'style_table"'."$this->table_style style=\"$this->table_sheet\"");
+		return $this->wrap($string, 'div', ' class="'.PukiWikiConfig::getParam('style_prefix').'ie5" '.$this->div_style).$this->table_around;
+	}
+	// テーブル入れ子用の連結
+	function table_inc_add ($arytable)
+	{
+		//}{で囲んだ場合は、同じセル内＝テーブルを入れ子にできる。
+		$td_level = 0 ;
+		$lines_tmp = array();
+		$td_tmp = "";
+		foreach($arytable as $td){
+			if (preg_match("/^\}([^|]*)$/",$td,$reg)) {
+				$td_level += 1;
+				if ($td_level == 1) $td = $reg[1];
+			}
+			if (preg_match("/^([^|]*)\{$/",$td,$reg)) {
+				$td_level -= 1;
+				if ($td_level == 0) $td = $reg[1];
+			}
+			if ($td_level) {
+				if ($td_level == 1){
+					//表内であるかの判定
+					if (preg_match("/^.*___td_br___$/",$td) || preg_match("/^___td_br___.*$/",$td)) {
+						$rep_str = "\n";
+					} else {
+						$rep_str = "->\n";
+					}
+					$td = preg_replace("/___td_br___([ #\-+*]|(___td_br___)+)/e","str_replace('___td_br___','$rep_str','$0')",$td);
+					$td_tmp .= str_replace("~___td_br___","~$rep_str",$td)."|";//ok
+					
+				} else {
+					$td_tmp .= str_replace("___td_br___","->\n",$td)."|";
+				}
+			} else {
+				$td_tmp .= $td;//ok
+				$td_tmp = str_replace("___td_br___","\n",$td_tmp);
+				$lines_tmp[] = $td_tmp;
+				$td_tmp = "";
+			}
+		}
+		return $lines_tmp;
+	}
+	function get_table_style($string) {
+//		echo "TABLE: $string \n";
+		$colors_reg = "aqua|navy|black|olive|blue|purple|fuchsia|red|gray|silver|green|teal|lime|white|maroon|yellow|transparent";
+		//$this->table_around = "<br clear=all /><br />";
+		$this->table_around = "<br clear=all />";
+		// 回り込み指定
+		if (preg_match("/AROUND/i",$string)) $this->table_around = "";
+		// ボーダー指定
+		if (preg_match("/B:([0-9]+),?([0-9]*)(one|two|boko|deko|in|out|dash|dott)?/i",$string,$reg)) {
+			if (preg_match("/one/i",$reg[3])) $border_type = "solid";
+			else if (preg_match("/two/i",$reg[3])) $border_type = "double";
+			else if (preg_match("/boko/i",$reg[3])) $border_type = "groove";
+			else if (preg_match("/deko/i",$reg[3])) $border_type = "ridge";
+			else if (preg_match("/in/i",$reg[3])) $border_type = "inset";
+			else if (preg_match("/out/i",$reg[3])) $border_type = "outset";
+			else if (preg_match("/dash/i",$reg[3])) $border_type = "dashed";
+			else if (preg_match("/dott/i",$reg[3])) $border_type = "dotted";
+			else $border_type = "outset";
+			//$this->table_style .= " border=\"".$reg[1]."\"";
+			if ($reg[1]==="0"){
+				$this->table_sheet .= "border:none;";
+			} else {
+				$this->table_sheet .= "border:".$border_type." ".$reg[1]."px;";
+			}
+			if ($reg[2]!=""){
+				$this->table_style .= " cellspacing=\"".$reg[2]."\"";
+			} else {
+				$this->table_style .= " cellspacing=\"1\"";
+			}
+			$string = preg_replace("/B:([0-9]+),?([0-9]*)(one|two|boko|deko|in|out|dash|dott)?/i","",$string);
+		} else {
+			$this->table_style .= " border=\"0\" cellspacing=\"1\"";
+			//$this->table_style .= " cellspacing=\"1\"";
+			//$this->table_sheet .= "border:none;";
+		}
+		// ボーダー色指定
+		if (preg_match("/BC:(#?[0-9abcdef]{6}?|$colors_reg|0)/i",$string,$reg)) {
+			$this->table_sheet .= "border-color:".$reg[1].";";
+			$string = preg_replace("/BC:(#?[0-9abcdef]{6}?|$colors_reg)/i","",$string);
+		}
+		// テーブル背景色指定
+		if (preg_match("/TC:(#?[0-9abcdef]{6}?|$colors_reg|0)/i",$string,$reg)) {
+			if ($reg[1]==="0") $reg[1]="transparent";
+			$this->table_sheet .= "background-color:".$reg[1].";";
+			$string = preg_replace("/TC:(#?[0-9abcdef]{6}?|$colors_reg|0)(\(([^),]*)(,no|,one|,1)?\))/i","TC:$2",$string);
+			$string = preg_replace("/TC:(#?[0-9abcdef]{6}?|$colors_reg|0)/i","",$string);
+		}
+		// テーブル背景画像指定
+		if (preg_match("/TC:\(([^),]*)(,once|,1)?\)/i",$string,$reg)) {
+			$reg[1] = str_replace("http","HTTP",$reg[1]);
+			$this->table_sheet .= "background-image: url(".$reg[1].");";
+			if ($reg[2]) $this->table_sheet .= "background-repeat: no-repeat;";
+			$string = preg_replace("/TC:\(([^),]*)(,once|,1)?\)/i","",$string);
+		}
+		// 配置・幅指定
+		if (preg_match("/T(LEFT|RIGHT)/i",$string,$reg)) {
+			$this->table_align = strtolower($reg[1]);
+			$this->table_style .= " align=\"".$this->table_align."\"";
+			$this->div_style = " style=\"text-align:".$this->table_align."\"";
+			if ($this->table_align == "left"){
+				$this->table_sheet .= "margin-left:10px;margin-right:auto;";
+			} else {
+				$this->table_sheet .= "margin-left:auto;margin-right:10px;";
+			}
+		}
+		if (preg_match("/T(CENTER)/i",$string,$reg)) {
+			$this->table_style .= " align=\"".strtolower($reg[1])."\"";
+			$this->div_style = " style=\"text-align:".strtolower($reg[1])."\"";
+			$this->table_sheet .= "margin-left:auto;margin-right:auto;";
+			$this->table_around = "";
+		}
+		if (preg_match("/T(LEFT|CENTER|RIGHT)?:([0-9]+[%]?)/i",$string,$reg)) {
+			if (!strpos($reg[2],"%")) $reg[2] .= "px";
+			$this->table_sheet .= "width:".$reg[2].";";
+		}
+		$string = preg_replace("/^(TLEFT|TCENTER|TRIGHT|T):([0-9]+[%]?)?/i","",$string);
+		return $string;
 	}
 }
 

@@ -125,11 +125,11 @@ class PukiWikiFunc {
 		
 		// 見出しの固有ID部を削除
 		$id = '';
-		if (preg_match('/^(\*{0,3})(.*?)\[#([A-Za-z][\w-]+)\](.*?)$/m',$str,$matches)) {
+		if (preg_match('/^(\*{0,6})(.*?)\[#([A-Za-z][\w-]+)\](.*?)$/m',$str,$matches)) {
 			$str = $matches[2].$matches[4];
 			$id = $matches[3];
 		} else {
-			$str = preg_replace('/^\*{0,3}/','',$str);
+			$str = preg_replace('/^\*{0,6}/','',$str);
 		}
 		if ($strip) {
 			$str = PukiWikiFunc::strip_htmltag(PukiWikiFunc::make_link(preg_replace($NotePattern,'',$str)));

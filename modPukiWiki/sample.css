@@ -1,7 +1,7 @@
 /*
- * modPukiWikiópÇÃÉXÉ^ÉCÉãÉVÅ[ÉgÉTÉìÉvÉã
+ * modPukiWikiÕ—§Œ•π•ø•§•Î•∑°º•»•µ•Û•◊•Î
  */
-.modPuki_ie5 {
+div.modPuki_ie5 {
 	text-align:left;
 }
 
@@ -9,7 +9,7 @@
 {
 	padding:0px;
 	border:0px;
-	margin:30px;
+	margin:2px 0px 2px 0px;
 	text-align:left;
 	color:inherit;
 	width:auto;
@@ -46,32 +46,62 @@ tfoot td.modPuki_style_td
 	color:inherit;
 	background-color:#D0D8E0;
 }
-
-h2.modPuki_head {
-	font-size : 18px;
-	font-family: "ÉqÉâÉMÉmäpÉS Pro W3", Osaka, Verdana, "ÇlÇr ÇoÉSÉVÉbÉN", sans-serif;;
+h1.modPuki_head {
+	font-size : 20pt;
+	font-family: "•“•È•Æ•Œ≥—•¥ Pro W3", Osaka, Verdana, "£Õ£” £–•¥•∑•√•Ø", sans-serif;
 	border-left: 10px solid #dcdcdc;
 	border-bottom: 1px solid #dcdcdc;
-	padding-left: 5px;
-	margin-left: -10px;
+	background-color:#FEFEFE;
+	padding-left: 0.3em;
+	margin-left: 0px;
+	margin-bottom: 5px;
+}
+h2.modPuki_head {
+	font-size : 16pt;
+	font-family: "•“•È•Æ•Œ≥—•¥ Pro W3", Osaka, Verdana, "£Õ£” £–•¥•∑•√•Ø", sans-serif;
+	border-left: 10px solid #dcdcdc;
+	border-bottom: 1px solid #dcdcdc;
+	background-color:#FEFEFE;
+	padding-left: 0.3em;
+	margin-left: 0px;
 	margin-bottom: 5px;
 }
 h3.modPuki_head {
-	font-size : 16px;
-	font-family: "ÉqÉâÉMÉmäpÉS Pro W3", Osaka, Verdana, "ÇlÇr ÇoÉSÉVÉbÉN", sans-serif;;
+	font-size : 12pt;
+	font-family: "•“•È•Æ•Œ≥—•¥ Pro W3", Osaka, Verdana, "£Õ£” £–•¥•∑•√•Ø", sans-serif;
 	border-left: 10px solid #dcdcdc;
 	border-bottom: 1px solid #dcdcdc;
-	padding-left: 5px;
-	margin-left: -10px;
+	background-color:#FEFEFE;
+	padding-left: 0.3em;
+	margin-left: 0px;
 	margin-bottom: 5px;
 }
+
 h4.modPuki_head {
-	font-family: "ÉqÉâÉMÉmäpÉS Pro W3", Osaka, Verdana, "ÇlÇr ÇoÉSÉVÉbÉN", sans-serif;;
+	font-size : 11pt;
+	font-family: "•“•È•Æ•Œ≥—•¥ Pro W3", Osaka, Verdana, "£Õ£” £–•¥•∑•√•Ø", sans-serif;
 	border-left: 10px solid #dcdcdc;
 	border-bottom: 1px solid #dcdcdc;
-	padding-left: 5px;
-	margin-left: -10px;
+	background-color:#FEFEFE;
+	padding-left: 0.3em;
+	margin-left: 0px;
 	margin-bottom: 5px;
+}
+
+h5.modPuki_head {
+	font-size : 10pt;
+	font-family: "•“•È•Æ•Œ≥—•¥ Pro W3", Osaka, Verdana, "£Õ£” £–•¥•∑•√•Ø", sans-serif;
+	background-color: #DDEEFF;
+	padding: 0px;
+	margin-left: 0px;
+}
+
+h6.modPuki_head {
+	font-size : 9pt;
+	font-family: "•“•È•Æ•Œ≥—•¥ Pro W3", Osaka, Verdana, "£Õ£” £–•¥•∑•√•Ø", sans-serif;
+	background-color: #DDEEFF;
+	padding: 0px;
+	margin-left: 0px;
 }
 
 ul.modPuki_list1 li
@@ -106,11 +136,18 @@ pre.modPuki_pre {
 	border-right:  #888899 1px solid;
 	font-size:12px;
 	line-height:14px;
-	padding:5px 0px 5px 10px;
-	margin: 5px 0px 5px 30px;
+	padding:5px 10px 5px 10px;
+	margin: 5px 10px 5px 20px;
 	white-space: pre;
+	width:95ex;
+	max-width:95ex;
+	max-height:20ex;
 	background-color: #F0F8FF;
 	color: black;
+	line-break:strict;
+	word-wrap:break-word; /* IE¬–∫ˆ */
+	word-break:break-all; /* IE¬–∫ˆ */
+	overflow:auto; /* Moziila/Opera¬–∫ˆ */
 }
 
 span.modPuki_noexists
