@@ -47,10 +47,12 @@ if (defined('XOOPS_ROOT_PATH')) {
 } else if (defined('ABSPATH') and ('WPINC')) {
 	//画像キャッシュなどのファイルの保管先 
 	// WordPress環境下では、Fileアップロード関連の設定を参照して自動設定
-	if (!defined('MOD_PUKI_UPLOAD_URL')) define('MOD_PUKI_UPLOAD_URL', get_settings('fileupload_url').'/modPukiWiki/');
-	if (!defined('MOD_PUKI_UPLOAD_DIR')) {
-		define('MOD_PUKI_UPLOAD_DIR', get_settings('fileupload_realpath').'/modPukiWiki/');
-		if (!file_exists(MOD_PUKI_UPLOAD_DIR)) mkdir(MOD_PUKI_UPLOAD_DIR, 0777);
+	if (file_exists(get_settings('fileupload_realpath'))) {
+		if (!defined('MOD_PUKI_UPLOAD_URL')) define('MOD_PUKI_UPLOAD_URL', get_settings('fileupload_url').'/modPukiWiki/');
+		if (!defined('MOD_PUKI_UPLOAD_DIR')) {
+			define('MOD_PUKI_UPLOAD_DIR', get_settings('fileupload_realpath').'/modPukiWiki/');
+			if (!file_exists(MOD_PUKI_UPLOAD_DIR)) mkdir(MOD_PUKI_UPLOAD_DIR, 0777);
+		}
 	}
 }
 
