@@ -41,14 +41,24 @@ function plugin_isbn_convert() {
 	$align = "right"; //規定値
 	$listprice ='';
 	$usedprice ='';
+	$img_size = "M";
 	switch (func_num_args())
 	{
+		case 4:
+			if (strtolower($aryargs[3]) == 'left') $align = "left";
+			elseif (strtolower($aryargs[3]) == 'clear') $align = "clear";
+			elseif (strtolower($aryargs[3]) == 'header' || $aryargs[3] == 'h') $header = "header";
+			elseif (strtolower($aryargs[3]) == 'info') $header = "info";
+			elseif (strtolower($aryargs[3]) == 'img' || $aryargs[3] == 'image') $title = "image";
+			elseif (strtolower($aryargs[3]) == 'small' || $aryargs[3] == 's') $img_size = "T";
+			else $title = htmlspecialchars($aryargs[2]);
 		case 3:
 			if (strtolower($aryargs[2]) == 'left') $align = "left";
 			elseif (strtolower($aryargs[2]) == 'clear') $align = "clear";
 			elseif (strtolower($aryargs[2]) == 'header' || $aryargs[2] == 'h') $header = "header";
 			elseif (strtolower($aryargs[2]) == 'info') $header = "info";
 			elseif (strtolower($aryargs[2]) == 'img' || $aryargs[2] == 'image') $title = "image";
+			elseif (strtolower($aryargs[2]) == 'small' || $aryargs[2] == 's') $img_size = "T";
 			else $title = htmlspecialchars($aryargs[2]);
 		case 2:
 			if (strtolower($aryargs[1]) == 'left') $align = "left";
@@ -56,6 +66,7 @@ function plugin_isbn_convert() {
 			elseif (strtolower($aryargs[1]) == 'header' || $aryargs[1] == 'h') $header = "header";
 			elseif (strtolower($aryargs[1]) == 'info') $header = "info";
 			elseif (strtolower($aryargs[1]) == 'img' || $aryargs[1] == 'image') $title = "image";
+			elseif (strtolower($aryargs[1]) == 'small' || $aryargs[1] == 's') $img_size = "T";
 			else $title = htmlspecialchars($aryargs[1]);
 		case 1:
 			if (strtolower($aryargs[0]) == 'clear') 
@@ -89,7 +100,7 @@ function plugin_isbn_convert() {
 		}
 	}
 	if ($header != "info")
-		return plugin_isbn_print_isbn_img($isbn, $align, $alt, $title, $h_title, $price, $header,$listprice,$usedprice);
+		return plugin_isbn_print_isbn_img($isbn, $align, $alt, $title, $h_title, $price, $header,$listprice,$usedprice,$img_size);
 	else
 	{
 		return plugin_isbn_get_info($tmpary,$isbn);
@@ -196,14 +207,14 @@ function plugin_isbn_get_info($data,$isbn)
 	return $ret;
 }
 
-function plugin_isbn_print_isbn_img($isbn, $align, $alt, $title, $h_title, $price, $header="",$listprice,$usedprice)
+function plugin_isbn_print_isbn_img($isbn, $align, $alt, $title, $h_title, $price, $header="",$listprice,$usedprice,$img_size)
 {
 	$amazon_a = '<a href="'.str_replace('_ISBN_',$isbn,MOD_PUKI_ISBN_AMAZON_SHOP).'" target="_blank" title="'.$alt.'">';
 	if ($align == 'clear') {			// 改行挿入
 		return '<div style="clear:both"></div>';
 	}
 
-	if (! ($url = plugin_isbn_cache_image_fetch($isbn, MOD_PUKI_UPLOAD_DIR))) return false;
+	if (! ($url = plugin_isbn_cache_image_fetch($isbn, MOD_PUKI_UPLOAD_DIR, true, $img_size))) return false;
 
 	if ($title == 'image') {				// タイトルがなければ、画像のみ表示
 		return <<<EOD
@@ -302,19 +313,21 @@ function plugin_isbn_cache_fetch($target, $dir, $check=true) {
 }
 
 // 画像キャッシュがあるか調べる
-function plugin_isbn_cache_image_fetch($target, $dir, $check=true) {
-	$filename = MOD_PUKI_UPLOAD_DIR.PukiWikiFunc::encode("ISBN".$target.".jpg");
+function plugin_isbn_cache_image_fetch($target, $dir, $check=true, $img_size="M") {
+	$filename = MOD_PUKI_UPLOAD_DIR.PukiWikiFunc::encode("ISBN".$target.$img_size.".jpg");
 
 	if (!is_readable($filename) || (is_readable($filename) && $check && MOD_PUKI_ISBN_AMAZON_EXPIRE_IMG * 3600 * 24 < time() - filemtime($filename))) {
-		$url = "http://images-jp.amazon.com/images/P/" . strtoupper($target) . ".09.MZZZZZZZ.jpg";
+		$url = "http://images-jp.amazon.com/images/P/" . strtoupper($target) . ".09.".$img_size."ZZZZZZZ.jpg";
 		if (!PukiWikiFunc::is_url($url)) return false; // URL 形式チェック
 		$size = @getimagesize($url);
 		if ($size[0] <= 1) {
-			$url = "http://images-jp.amazon.com/images/P/" . strtoupper($target) . ".01.MZZZZZZZ.jpg";
+			$url = "http://images-jp.amazon.com/images/P/" . strtoupper($target) . ".01.".$img_size."ZZZZZZZ.jpg";
 			$size = @getimagesize($url);
-			if ($size[0] <= 1) $url = MOD_PUKI_NOIMAGE;
+			if ($size[0] <= 1) { 
+				$url = $noimage = ($img_size == "M") ? MOD_PUKI_NOIMAGE : MOD_PUKI_NOIMAGE_S;
+			}
 		}
-		if ($url != MOD_PUKI_NOIMAGE){
+		if ($url != $noimage){
 			$file = fopen($url, "rb");
 			// リモートファイルのパケット有効後対策
 			// http://search.net-newbie.com/php/function.fread.html
@@ -339,10 +352,10 @@ function plugin_isbn_cache_image_fetch($target, $dir, $check=true) {
 			$data = fread($file, 100000); 
 			fclose ($file);
 		}
-		plugin_isbn_cache_image_save($data, $target, MOD_PUKI_UPLOAD_DIR);
-		return MOD_PUKI_UPLOAD_URL.PukiWikiFunc::encode("ISBN".$target.".jpg");;
+		plugin_isbn_cache_image_save($data, $target.$img_size, MOD_PUKI_UPLOAD_DIR);
+		return MOD_PUKI_UPLOAD_URL.PukiWikiFunc::encode("ISBN".$target.$img_size.".jpg");;
 	} else
-		return MOD_PUKI_UPLOAD_URL.PukiWikiFunc::encode("ISBN".$target.".jpg");;
+		return MOD_PUKI_UPLOAD_URL.PukiWikiFunc::encode("ISBN".$target.$img_size.".jpg");;
 }
 
 // キャッシュを保存

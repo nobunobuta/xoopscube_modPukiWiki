@@ -99,6 +99,7 @@ if(defined('MOD_PUKI_UPLOAD_DIR')) {
 	$modPukiImages = array(
 		'file.gif',
 		'noimage.png',
+		'noimage_s.png',
 		'smile.gif',
 		'bigsmile.gif',
 		'huh.gif',
@@ -112,6 +113,7 @@ if(defined('MOD_PUKI_UPLOAD_DIR')) {
 		if (!file_exists(MOD_PUKI_UPLOAD_DIR.$modPukiIMG)) copy (MOD_PUKI_IMAGE_DIR.$modPukiIMG, MOD_PUKI_UPLOAD_DIR.$modPukiIMG);
 	}
 	if (!defined('MOD_PUKI_NOIMAGE')) define('MOD_PUKI_NOIMAGE',MOD_PUKI_UPLOAD_URL.'/noimage.png');
+	if (!defined('MOD_PUKI_NOIMAGE_S')) define('MOD_PUKI_NOIMAGE_S',MOD_PUKI_UPLOAD_URL.'/noimage_s.png');
 	if (!defined('MOD_PUKI_FILE_ICON')) define('MOD_PUKI_FILE_ICON',MOD_PUKI_UPLOAD_URL.'/file.gif');
 }
 
