@@ -16,6 +16,7 @@ if (!defined('MOD_PUKI_BASE')) {
 	define('MOD_PUKI_CONFIG_DIR',  MOD_PUKI_BASE . '/config/');
 	define('MOD_PUKI_CACHE_DIR',  MOD_PUKI_BASE . '/cache/');
 	define('MOD_PUKI_IMAGE_DIR',  MOD_PUKI_BASE . '/images/');
+	define('MOD_PUKI_DATA_DIR',  MOD_PUKI_BASE . '/wiki/');
 	define('MOD_PUKI_DEFAULT', MOD_PUKI_CONFIG_DIR .'default.php');
 }
 
@@ -27,6 +28,7 @@ if (defined('XOOPS_ROOT_PATH')) {
 		if (!defined('MOD_PUKI_WIKI_URL')) define('MOD_PUKI_WIKI_URL',XOOPS_URL.'/modules/bwiki/index.php');
 		if (!defined('MOD_PUKI_WIKI_DATA_DIR')) define('MOD_PUKI_WIKI_DATA_DIR',XOOPS_ROOT_PATH.'/modules/bwiki/wiki/');
 		if (!defined('MOD_PUKI_WIKI_CACHE_DIR')) define('MOD_PUKI_WIKI_CACHE_DIR', XOOPS_ROOT_PATH.'/modules/bwiki/cache/');
+		if (!defined('MOD_PUKI_WIKI_UPLOAD_DIR')) define('MOD_PUKI_WIKI_UPLOAD_DIR', XOOPS_ROOT_PATH.'/modules/bwiki/attach/');
 		if (!defined('MOD_PUKI_WIKI_VER')) define('MOD_PUKI_WIKI_VER','1.4');
 		
 	} else if (file_exists(XOOPS_ROOT_PATH.'/modules/pukiwiki/xoops_version.php')) {
@@ -34,6 +36,7 @@ if (defined('XOOPS_ROOT_PATH')) {
 		if (!defined('MOD_PUKI_WIKI_URL')) define('MOD_PUKI_WIKI_URL',XOOPS_URL.'/modules/pukiwiki/index.php');
 		if (!defined('MOD_PUKI_WIKI_DATA_DIR')) define('MOD_PUKI_WIKI_DATA_DIR',XOOPS_ROOT_PATH.'/modules/pukiwiki/wiki/');
 		if (!defined('MOD_PUKI_WIKI_CACHE_DIR')) define('MOD_PUKI_WIKI_CACHE_DIR', XOOPS_ROOT_PATH.'/modules/pukiwiki/cache/');
+		if (!defined('MOD_PUKI_WIKI_UPLOAD_DIR')) define('MOD_PUKI_WIKI_UPLOAD_DIR', XOOPS_ROOT_PATH.'/modules/pukiwiki/attach/');
 		if (!defined('MOD_PUKI_WIKI_VER')) define('MOD_PUKI_WIKI_VER','1.3');
 	}
 	//画像キャッシュなどのファイルの保管先 
