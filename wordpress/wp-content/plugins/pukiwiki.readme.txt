@@ -1,0 +1,26 @@
+WordPress用のPukiWikiレンダープラグインです。
+
+[導入方法］
+１．pukiwiki.phpをwp-content/pluginsにコピーする。
+２．wp-content/plugins下にmodPukiWikiディレクトリを丸ごとコピーする
+３．WordPressのPlugin設定画面で、pukiwikiを有効にする。
+
+導入後のディレクトリツリーイメージ
+-WordPressディレクトリ
+   |
+   +-wp-content
+      |
+      +-plugins
+          |
+          +-pukiwiki.php
+          |
+          +-modPukiWiki
+              |
+              +-cache
+              |
+              +-class
+              |
+              +-config
+              :
+              :
+              
