@@ -276,19 +276,16 @@ pre.modPukiWP_pre {
 	border-left:   #DDDDEE 1px solid;
 	border-right:  #888899 1px solid;
 	font-size:12px;
-	line-height:14px;
-	padding:5px 10px 5px 10px;
+	line-height:120%;
+	padding:0.9em 10px 0.1em 10px;
 	margin: 5px 10px 5px 20px;
 	white-space: pre;
 	width:95ex;
 	max-width:95ex;
-	max-height:20ex;
 	background-color: #F0F8FF;
 	color: black;
-	line-break:strict;
-	word-wrap:break-word; /* IEÂÐºö */
-	word-break:break-all; /* IEÂÐºö */
 	overflow:auto; /* Moziila/OperaÂÐºö */
+	white-space: pre;
 }
 
 span.modPukiWP_noexists

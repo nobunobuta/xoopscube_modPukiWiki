@@ -986,7 +986,14 @@ class PukiWikiPre extends PukiWikiElement
 
 	function toString()
 	{
-		return $this->wrap(join("\n", $this->elements), 'pre' ,' class="'.PukiWikiConfig::getParam('style_prefix').'pre"');
+		$maxline = PukiWikiConfig::getParam('pre_maxlines') ? PukiWikiConfig::getParam('pre_maxlines') :20;
+		$count = count($this->elements);
+		if ($count>$maxline) {
+			$count = $maxline+1.5;
+			return $this->wrap(join("\n", $this->elements), 'pre' ,' style="height:'.$count*1.2.'em;" class="'.PukiWikiConfig::getParam('style_prefix').'pre"');
+		} else {
+			return $this->wrap(join("\n", $this->elements), 'pre' ,' class="'.PukiWikiConfig::getParam('style_prefix').'pre"');
+		}
 	}
 }
 
