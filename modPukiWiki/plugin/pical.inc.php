@@ -67,7 +67,7 @@ function plugin_pical_convert() {
 		return '';
 	}
 	$catname = "";
-	list($date,$catname,$option1) = func_get_args();
+	@list($date,$catname,$option1) = func_get_args();
 	$date = str_replace(array('.','/','-'),array('','',''),$date);
 	$yyyy = substr($date,0,4);
 	$mm = substr($date,4,2);
@@ -105,7 +105,7 @@ function plugin_pical_convert() {
 			" AND admission<>0 AND $whr_class AND ".plugin_pical_where_categories($catname).
 			" ORDER by allday DESC, start";
 //	echo $SQL;
-	if ( !$query = $xoopsDB->query($SQL, $maxtopic, 0) ) echo "Error! (piCal)";
+	if ( !$query = $xoopsDB->query($SQL) ) echo "Error! (piCal)";
 	$margin = PukiWikiConfig::getParam('_ul_margin') + PukiWikiConfig::getParam('_ul_left_margin');
 	$style = sprintf(PukiWikiConfig::getParam('_list_pad_str'), 1, $margin, $margin);
 	$retstr = "<ul $style>";
