@@ -602,7 +602,7 @@ class PukiWikiLink_autolink extends PukiWikiLink
 		}
 		
 		// 共通リンクディレクトリを探す by nao-pon
-		if (PukiWikiFunc::is_page($name))
+		if (!PukiWikiFunc::is_page($name))
 		{
 			if (!$name = PukiWikiFunc::get_real_pagename($name))
 				return FALSE;
