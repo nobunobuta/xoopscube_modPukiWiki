@@ -510,7 +510,7 @@ function plugin_ref_make_thumb($url,$s_file_base,$width,$height,$org_w,$org_h) {
 	$size = @GetImageSize($url);
 
 	$dst_im = $imagecreate($width,$height);
-	switch($size[2]):
+	switch($size[2]){
 		case "1": //gif·Á¼°
 			if ($gifread == "on"){
 				$src_im = ImageCreateFromGif($url);
@@ -533,7 +533,7 @@ function plugin_ref_make_thumb($url,$s_file_base,$width,$height,$org_w,$org_h) {
 			break;
 		default:
 			break;
-	endswitch;
+	}
 	return $url;
 }
 ?>
