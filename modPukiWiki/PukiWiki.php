@@ -79,6 +79,13 @@ if(defined('MOD_PUKI_UPLOAD_DIR')) {
 	$modPukiImages = array(
 		'file.gif',
 		'noimage.png',
+		'smile.gif',
+		'bigsmile.gif',
+		'huh.gif',
+		'oh.gif',
+		'wink.gif',
+		'sad.gif',
+		'heart.gif',
 	);
 	foreach ($modPukiImages as $modPukiIMG) {
 		if (!file_exists(MOD_PUKI_UPLOAD_DIR.$modPukiIMG)) copy (MOD_PUKI_IMAGE_DIR.$modPukiIMG, MOD_PUKI_UPLOAD_DIR.$modPukiIMG);
