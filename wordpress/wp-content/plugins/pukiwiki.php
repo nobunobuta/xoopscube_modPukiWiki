@@ -17,10 +17,19 @@ function pukiwiki($text) {
 	
 
 	$render = &new PukiWikiRender;
-// PukiWikiModやB-WikiへのAutoLinkを有効にする
-	//PukiWikiConfig::setParam("autolink",3);
-// WordPress記事へのInterWikiNameを定義する
-	//PukiWikiConfig::addInterWiki('['.XOOPS_URL.'/modules/wordpress/index.php? WordPress]');
+//以下のオプションは必要に応じてコメントをはずして下さい。
+//PukiWikiModやB-WikiへのAutoLinkを有効にする
+//	PukiWikiConfig::setParam("autolink",3);
+
+//PukiWikiレンダリングキャッシュを使用する
+//	PukiWikiConfig::setParam("use_cache",1);
+
+//PukiWikiModテーブル拡張書式を使用する
+//	PukiWikiConfig::setParam("ExtTable",1);
+
+//WordPress記事へのInterWikiNameを定義する
+//	PukiWikiConfig::addInterWiki('['.XOOPS_URL.'/modules/wordpress/index.php? WordPress]');
+
 	$retstr = $render->transform($text);
 	unset($render);
 	return $retstr;
