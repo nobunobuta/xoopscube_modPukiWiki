@@ -165,7 +165,7 @@ class PukiWikiLink
 		$this->name = $name;
 		$this->body = $body;
 		$this->type = $type;
-		if ($type != 'InterWikiName' and preg_match('/\.(gif|png|jpe?g)$/i',$alias))
+		if (PukiWikiConfig::is_url($alias) && preg_match('/\.(gif|png|jpe?g)$/i',$alias))  //BugTrack 669
 		{
 			$alias = htmlspecialchars($alias);
 			$alias = "<img src=\"$alias\" alt=\"$name\" />";
@@ -177,6 +177,7 @@ class PukiWikiLink
 				$converter = new PukiWikiInlineConverter(array('plugin'));
 			}
 			$alias = PukiWikiConfig::applyRules($converter->convert($alias,$page));
+			$alias = preg_replace('#</?a[^>]*>#i','',$alias);  //BugTrack 669
 		}
 		$this->alias = $alias;
 		
