@@ -26,7 +26,29 @@ if (!defined('MOD_PUKI_UPLOAD_URL')) define('MOD_PUKI_UPLOAD_URL','./attach/');
 //この部分は環境によって変更して下さい。
 //modPukiWiki本体のインクルード
 require (dirname(__FILE__).'/../modPukiWiki/PukiWiki.php') ;
-//PukiWikiのサンプルソース
+
+//PukiWikiRenderインスタンス生成
+$render = new PukiWikiRender;
+//PukiWikiのソースの取得先決定(ローカルWikiファイルの表示用)
+if ($_GET['page']) {
+	$text = $render->getLocalPage($page = NULL);
+} else {
+	$text = get_sample_wiki();
+}
+//InterWikiNameの設定
+PukiWikiConfig::addInterWiki('[http://www.google.co.jp/search?ie=utf8&oe=utf8&q=$1&lr=lang_ja&hl=ja Google] utf8');
+//テーブル拡張書式を有効にする
+PukiWikiConfig::setParam('ExtTable',true);
+//ローカルWikiファイル表示用URL
+PukiWikiConfig::setParam('LocalShowURL',"index.php?page=%s");
+//レンダリングして表示
+echo $render->transform($text);
+?>
+</body>
+</html>
+
+<?php
+function get_sample_wiki() {
 $text = <<< EOD
 ***ヘッディング
  *ヘッディング１
@@ -44,6 +66,8 @@ $text = <<< EOD
 ***リンク
  [[ホームページ:http://www.kowa.org]]
 [[ホームページ:http://www.kowa.org]]
+***ローカルWikiファイル表示
+[[テキスト整形のルール>整形ルール]]
 
 ***テーブル
  |a|a|b|
@@ -170,14 +194,5 @@ aaaa{|}aaa{|->
 ->
 |test|
 EOD;
-
-//PukiWikiRenderインスタンス生成
-$render = new PukiWikiRender;
-//InterWikiNameの設定
-PukiWikiConfig::addInterWiki('[http://www.google.co.jp/search?ie=utf8&oe=utf8&q=$1&lr=lang_ja&hl=ja Google] utf8');
-PukiWikiConfig::setParam('ExtTable',true);
-//レンダリングして表示
-echo $render->transform($text);
+}
 ?>
-</body>
-</html>
