@@ -1,6 +1,10 @@
 <?php
 //環境定義ファイルの読込
-include('PukiWiki.ini.php');
+if (file_exists('PukiWiki.ini.php')) {
+	include('PukiWiki.ini.php');
+} else if (file_exists('PukiWiki.ini.dist.php')) {
+	include('PukiWiki.ini.dist.php');
+}
 
 if (!defined('MOD_PUKI_SOURCE_ENCODING')) define('MOD_PUKI_SOURCE_ENCODING','EUC-JP');
 if (!defined('MOD_PUKI_ZONETIME')) define('MOD_PUKI_ZONETIME',9 * 3600); // JST = GMT+9

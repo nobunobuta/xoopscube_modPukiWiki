@@ -61,6 +61,8 @@ class PukiWikiRender {
 		//コンストラクタのパラメータで$configが指定されている場合は、読み込む。
 		if ($config and file_exists(MOD_PUKI_CONFIG_DIR.$config.".php")) {
 			include (MOD_PUKI_CONFIG_DIR.$config.".php");
+		} else if ($config and file_exists(MOD_PUKI_CONFIG_DIR.$config.".dist.php")){
+			include (MOD_PUKI_CONFIG_DIR.$config.".dist.php");
 		}
 	}
 
