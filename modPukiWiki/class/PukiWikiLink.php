@@ -20,18 +20,32 @@ class PukiWikiInlineConverter
 		
 		if ($converters === NULL)
 		{
-			$converters = array(
-				'plugin',        // インラインプラグイン
-				'note',          // 注釈
-				'url',           // URL
-				'url_interwiki', // URL (interwiki definition)
-				'mailto',        // mailto:
-				'interwikiname', // InterWikiName
-				'autolink',      // AutoLink
-				'bracketname',   // BracketName
-				'wikiname',      // WikiName
-				'autolink_a',    // AutoLink(アルファベット)
-			);
+			if (PukiWikiConfig::GetParam('autourllink')) {
+				$converters = array(
+					'plugin',        // インラインプラグイン
+					'note',          // 注釈
+					'url',           // URL
+					'url_interwiki', // URL (interwiki definition)
+					'mailto',        // mailto:
+					'interwikiname', // InterWikiName
+					'autolink',      // AutoLink
+					'bracketname',   // BracketName
+					'wikiname',      // WikiName
+					'autolink_a',    // AutoLink(アルファベット)
+				);
+			} else {
+				$converters = array(
+					'plugin',        // インラインプラグイン
+					'note',          // 注釈
+					'url_interwiki', // URL (interwiki definition)
+					'mailto',        // mailto:
+					'interwikiname', // InterWikiName
+					'autolink',      // AutoLink
+					'bracketname',   // BracketName
+					'wikiname',      // WikiName
+					'autolink_a',    // AutoLink(アルファベット)
+				);
+			}
 		}
 		if ($excludes !== NULL)
 		{
@@ -578,10 +592,11 @@ EOD;
 		
 		$id = ++$note_id;
 		$note = PukiWikiFunc::make_link($body);
-		
+		$style_small = PukiWikiConfig::getParam('style_prefix')."small";
+		$style_super = PukiWikiConfig::getParam('style_prefix')."note_super";
 		$_PukiWikiFootExplain[$id] = <<<EOD
-<a id="notefoot_$id" href="#notetext_$id" class="'.PukiWikiConfig::getParam('style_prefix').'note_super">*$id</a>
-<span class="'.PukiWikiConfig::getParam('style_prefix').'small">$note</span>
+<a id="notefoot_$id" href="#notetext_$id" class="$style_super">*$id</a>
+<span class="$style_small">$note</span>
 <br />
 EOD;
 		$name = "<a id=\"notetext_$id\" href=\"#notefoot_$id\" class=\"".PukiWikiConfig::getParam('style_prefix')."note_super\">*$id</a>";
