@@ -4,6 +4,31 @@
 //
 // modPukiWikiレンダリングエンジン メインクラス
 //
+/**
+ * @package     modPukiWiki
+ * 
+ * @author	    Nobuki Kowa <Nobuki@Kowa.ORG>
+ * @copyright	Copyright &copy; 2004 Nobuki Kowa<br/>
+ *                 License is GNU/GPL.<br/>
+ *                 Based on PukiWiki 1.4 by PukiWiki Developers Team.<br/>
+ *                   Copyright &copy; 2001,2002,2003 PukiWiki Developers Team.<br/>
+ *                   License is GNU/GPL.<br/>
+ *                   Based on "PukiWiki" 1.3 by sng<br/>
+ *                     Copyright &copy; 2001,2002 by sng, PukiWiki Developers Team<br/>
+ *                 Partly based on PukiWikiMod 0.8.0 by nao-pon.<br/>
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ *
+ */
+
+/**
+ * modPukiWiki Rendering Engine  class.
+ *
+ *
+ * @author  Nobuki Kowa <Nobuki@Kowa.ORG>
+ * @todo    :
+ * @public
+ */
+
 class PukiWikiRender {
 	var $_body;
 	var $_settings;
@@ -12,6 +37,14 @@ class PukiWikiRender {
 	var $_replace;
 	var $_source;
 	var $_md5hash;
+	/**
+	 * @desc		PukiWikiRenderクラスのコンストラクタ
+	 *
+	 * @param		$config		使用するconfigファイルのファイル名
+	 * @return		
+	 * 
+	 * @author		
+	 */
 	
 	function PukiWikiRender($config='') {
 		//デフォルトの設定ファイル読込
@@ -31,11 +64,28 @@ class PukiWikiRender {
 		}
 	}
 
+	/**
+	 * @desc		PukiWiki書式の文字列をHTMLに変換する。
+	 *				実際には、parseメソッドとrenderメソッドを連続して呼び出している。
+	 *
+	 * @param		$wikistr	PukiWiki書式にて記述された文字列
+	 * @return		変換結果のHTML文字列
+	 * 
+	 * @author		
+	 */
 	function transform($wikistr) {
 		$this->parse($wikistr);
 		return $this->render();
 	}
 
+	/**
+	 * @desc		PukiWiki書式の文字列を解釈する。
+	 *
+	 * @param		$wikistr	PukiWiki書式にて記述された文字列
+	 * @return
+	 * 
+	 * @author		
+	 */
 	function parse($wikistr) {
 		//Wikiソースの保存とmd5ハッシュの取得
 		$this->_source = $wikistr;
@@ -56,6 +106,13 @@ class PukiWikiRender {
 		$this->_body->parse($wikistr);
 	}
 
+	/**
+	 * @desc		parseメソッドによって解釈された結果を元にしてHTML文字列を出力
+	 *
+	 * @return		変換結果のHTML文字列
+	 * 
+	 * @author		
+	 */
 	function render() {
 		global $_PukiWikiFootExplain;
 
@@ -73,6 +130,21 @@ class PukiWikiRender {
 			$retstr .= count($_PukiWikiFootExplain) ? PukiWikiConfig::getParam('note_hr').join("\n",$_PukiWikiFootExplain) : '';
 		}
 		$_PukiWikiFootExplain=array();
+
+		// 自ホスト名を省略 マルチドメイン対策 Original by nao-pon
+		list($host,$port) = explode(':',$_SERVER['HTTP_HOST']);
+		if (!$port) {
+			if ($_SERVER['SSL']=='on') {
+				$thishost = 'https://'.$host;
+			} else {
+				$thishost = 'http://'.$host;
+			}
+		} else if ($_SERVER['SSL']=='on')  {
+			$thishost = 'https://'.$host.":".$port;
+		} else {
+			$thishost = 'http://'.$host.":".$port;
+		}
+		$retstr = str_replace("<a href=\"{$thishost}","<a href=\"",$retstr);
 
 		if (PukiWikiConfig::getParam('use_cache'))
 		{
