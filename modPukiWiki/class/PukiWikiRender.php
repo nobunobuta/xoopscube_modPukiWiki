@@ -132,14 +132,14 @@ class PukiWikiRender {
 		$_PukiWikiFootExplain=array();
 
 		// 自ホスト名を省略 マルチドメイン対策 Original by nao-pon
-		list($host,$port) = explode(':',$_SERVER['HTTP_HOST']);
+		@list($host,$port) = explode(':',$_SERVER['HTTP_HOST']);
 		if (!$port) {
-			if ($_SERVER['SSL']=='on') {
+			if (!empty($_SERVER['SSL']) and ($_SERVER['SSL']=='on')) {
 				$thishost = 'https://'.$host;
 			} else {
 				$thishost = 'http://'.$host;
 			}
-		} else if ($_SERVER['SSL']=='on')  {
+		} else if (!empty($_SERVER['SSL']) and ($_SERVER['SSL']=='on')) {
 			$thishost = 'https://'.$host.":".$port;
 		} else {
 			$thishost = 'http://'.$host.":".$port;
@@ -190,7 +190,7 @@ class PukiWikiRender {
 	function _fix_table_br($string) {
 		$string = str_replace("~___td_br___","<br>",$string);
 		$string = str_replace("___td_br___","",$string);
-		$string = preg_replace("/^<p>([^<>]*)<\/p>$/m","$1",$string);
+		$string = preg_replace("/^<p>([^<>\n]*)<\/p>$/sD","$1",$string);
 		return $string;
 	}
 
