@@ -8,7 +8,7 @@ Author: nobunobu
 Author URI: http://www.kowa.org/
 */
 function pukiwiki($text) {
-	include (dirname(__FILE__).'/modpukiwiki/PukiWiki.php') ;
+	include (dirname(__FILE__).'/modPukiWiki/PukiWiki.php') ;
 
 	$text = stripslashes($text);
 	//<!--more-->‚Ö‚Ì‘Î‰ž
