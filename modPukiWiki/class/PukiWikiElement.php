@@ -554,7 +554,7 @@ class PukiWikiTableCell extends PukiWikiElement
 			$cells[0] = preg_replace("/(?:SC|BC):\(([^),]*)(,once|,1)?\)/i","",$cells[0]);
 		}
 		if (preg_match("/K:([0-9]+),?([0-9]*)(one|two|boko|deko|in|out|dash|dott)?/i",$cells[0],$tmp)) {
-			if (!empty($tmp[3])) {
+			if (array_key_exists (3,$tmp)) {
 				if (preg_match("/one/i",$tmp[3])) $border_type = "solid";
 				else if (preg_match("/two/i",$tmp[3])) $border_type = "double";
 				else if (preg_match("/boko/i",$tmp[3])) $border_type = "groove";
@@ -567,14 +567,14 @@ class PukiWikiTableCell extends PukiWikiElement
 				$border_type = "outset";
 			}
 			//$this->table_style .= " border=\"".$tmp[1]."\"";
-			if (!empty($tmp[1])) {
+			if (array_key_exists (1,$tmp)) {
 				if ($tmp[1]==="0"){
 					$this->style['border'] = "border:none;";
 				} else {
 					$this->style['border'] = "border:".$border_type." ".$tmp[1]."px;";
 				}
 			}
-			if (!empty($tmp[2])) {
+			if (array_key_exists (2,$tmp)) {
 				if ($reg[2]!=""){
 					$this->style['padding'] .= " padding:".$reg[2].";";
 				} else {
@@ -587,22 +587,23 @@ class PukiWikiTableCell extends PukiWikiElement
 		}
 		// ボーダー色指定
 		if (preg_match("/KC:(#?[0-9abcdef]{6}?|$colors_reg|0)/i",$cells[0],$tmp)) {
+			if ($tmp[1]==="0") $tmp[1]="transparent";
 			$this->style['border-color'] = "border-color:".$tmp[1].";";
-			$cells[0] = preg_replace("/KC:(#?[0-9abcdef]{6}?|$colors_reg)/i","",$cells[0]);
+			$cells[0] = preg_replace("/KC:(#?[0-9abcdef]{6}?|$colors_reg|0)/i","",$cells[0]);
 		}
 		// セル規定文字揃え、幅指定
 		if (preg_match("/(LEFT|CENTER|RIGHT)?:(TOP|MIDDLE|BOTTOM)?(?::)?([0-9]+[%]?)?/i",$cells[0],$tmp)) {
-			if ($tmp[0] != ':') {
-				if (!empty($tmp[3])) {
+			if (substr($tmp[0],0,1) != ':') {
+				if (array_key_exists (3,$tmp)) {
 					if ($tmp[3]) {
 						if (!strpos($tmp[3],"%")) $tmp[3] .= "px";
 						$this->style['width'] = "width:".$tmp[3].";";
 					}
 				}
-				if (!empty($tmp[1])) {
+				if (array_key_exists (1,$tmp)) {
 					if ($tmp[1]) $this->style['align'] = "text-align:".strtolower($tmp[1]).";";
 				}
-				if (!empty($tmp[2])) {
+				if (array_key_exists (2,$tmp)) {
 					if ($tmp[2]) $this->style['valign'] = "vertical-align:".strtolower($tmp[2]).";";
 				}
 				$cells[0] = preg_replace("/(LEFT|CENTER|RIGHT)?:(TOP|MIDDLE|BOTTOM)?(?::)?([0-9]+[%]?)?/i","",$cells[0]);
