@@ -11,7 +11,7 @@ if (!defined('MOD_PUKI_ZONETIME')) define('MOD_PUKI_ZONETIME',9 * 3600); // JST 
 if (!defined('MOD_PUKI_ZONE')) define('MOD_PUKI_ZONE','JST');
 
 if (!defined('MOD_PUKI_LOCALZONE')) define('MOD_PUKI_LOCALZONE',date('Z'));
-if (!defined('MOD_PUKI_UTIME')) define('MOD_PUKI_UTIME',time()- - MOD_PUKI_LOCALZONE);
+if (!defined('MOD_PUKI_UTIME')) define('MOD_PUKI_UTIME',time()-MOD_PUKI_LOCALZONE);
 
 
 if (!defined('MOD_PUKI_BASE')) {
@@ -20,6 +20,7 @@ if (!defined('MOD_PUKI_BASE')) {
 	define('MOD_PUKI_CONFIG_DIR',  MOD_PUKI_BASE . '/config/');
 	define('MOD_PUKI_IMAGE_DIR',  MOD_PUKI_BASE . '/images/');
 	define('MOD_PUKI_DATA_DIR',  MOD_PUKI_BASE . '/wiki/');
+	define('MOD_PUKI_LANG_BASE',  MOD_PUKI_BASE . '/lang/');
 	define('MOD_PUKI_DEFAULT', MOD_PUKI_CONFIG_DIR .'default.php');
 }
 
@@ -55,8 +56,20 @@ if (defined('XOOPS_ROOT_PATH')) {
 		define('MOD_PUKI_UPLOAD_DIR',XOOPS_ROOT_PATH.'/uploads/modPukiWiki/');
 		if (!file_exists(MOD_PUKI_UPLOAD_DIR)) mkdir(MOD_PUKI_UPLOAD_DIR, 0777);
 	}
-//For WordPress Environment
+	//言語ファイル
+	if (!defined('MOD_PUKI_LANG')) {
+		if (!defined('_LANGCODE')) {
+			define('MOD_PUKI_LANG','en');
+		} else {
+			if (file_exists(MOD_PUKI_LANG_BASE.'/'._LANGCODE)) {
+				define('MOD_PUKI_LANG',_LANGCODE);
+			} else {
+				define('MOD_PUKI_LANG', 'en');
+			}
+		}
+	}
 } else if (defined('ABSPATH') and ('WPINC')) {
+//For WordPress Environment
 	//キャッシュのファイルの保管先 
 	// XOOPS環境下では、wp-contentディレクトリ下にmodPukiWikiというディレクトリを作成して自動設定
 	if (!defined('MOD_PUKI_CACHE_DIR')) {
@@ -75,8 +88,11 @@ if (defined('XOOPS_ROOT_PATH')) {
 } else {
 	//キャッシュのファイルの保管先 
 	// 汎用環境下では、modPukiWikiのcacheディレクトリをそのまま利用
-	define('MOD_PUKI_CACHE_DIR', MOD_PUKI_BASE . '/cache/');
+	if (!defined('MOD_PUKI_CACHE_DIR')) define('MOD_PUKI_CACHE_DIR', MOD_PUKI_BASE . '/cache/');
+	// デフォルトの言語は日本語に
+	if (!defined('MOD_PUKI_LANG')) define('MOD_PUKI_LANG','ja');
 }
+if (!defined('MOD_PUKI_LANG_DIR')) define('MOD_PUKI_LANG_DIR',MOD_PUKI_LANG_BASE.'/'.MOD_PUKI_LANG);
 
 //Plugin等で使用する画像ファイルを、画像キャッシュディレクトリに保存する。
 if(defined('MOD_PUKI_UPLOAD_DIR')) {
