@@ -19,6 +19,7 @@
 
 	$_settings['top'] = "";
 	$_settings['autolink'] = 0;
+	$_settings['autourllink'] = 1;
 	$_settings['nowikiname'] = 1;
 
 /////////////////////////////////////////////////
@@ -43,15 +44,16 @@
 	$_settings['_ol_margin'] = 16;       // リストの階層間の間隔(px)
 	$_settings['_dl_left_margin'] = 0;   // リストと画面左端との間隔(px)
 	$_settings['_dl_margin'] = 16;        // リストの階層間の間隔(px)
-	$_settings['_list_pad_str'] = ' class="'.PukiWikiConfig::getParam('style_prefix').'list%d" style="padding-left:%dpx;margin-left:%dpx"';
+	$_settings['_list_pad_str'] = ' class="'.$_settings['style_prefix'].'list%d" style="padding-left:%dpx;margin-left:%dpx"';
 
 	/////////////////////////////////////////////////
 	// 水平線のタグ
-	$_settings['hr'] = '<hr class="'.PukiWikiConfig::getParam('style_prefix').'full_hr" />';
+	$_settings['hr'] = '<hr class="'.$_settings['style_prefix'].'full_hr" />';
 	/////////////////////////////////////////////////
 	// 文末の注釈の直前に表示するタグ
-	$_settings['note_hr'] = '<hr class="'.PukiWikiConfig::getParam('style_prefix').'note_hr" />';
+	$_settings['note_hr'] = '<hr class="'.$_settings['style_prefix'].'note_hr" />';
 
+	$_settings['ExtTable'] = false;
 /////////////////////////////////////////////////
 // HTTPリクエストにプロキシサーバを使用する
 	$_settings['use_proxy'] = 0;
