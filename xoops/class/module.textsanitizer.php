@@ -210,7 +210,7 @@ class MyTextSanitizer
      *
      * @return	string
 	 */
-	function &renderWikistyle(&$text, $xcode=1, $image=1)
+	function &renderWikistyle(&$text, $xcode=1, $image=1, $br=1)
 	{
 		//modPukiWiki
 		include_once(XOOPS_ROOT_PATH.'/class/modPukiWiki/PukiWiki.php');
@@ -218,6 +218,7 @@ class MyTextSanitizer
 		if (!is_object($render))
 			$render = &new PukiWikiRender('xoops');
 		$text =& $this->codePreConv($text, $xcode); // Ryuji_edit(2003-11-18)
+		PukiWikiConfig::setParam('line_break',$br);
 		$text = $render->transform($text);
 		// XOOPS Quote style
 		$text = str_replace(array('<blockquote>','</blockquote>'),array(_QUOTEC.'<div class="xoopsQuote"><blockquote>','</blockquote></div>'),$text);
@@ -305,9 +306,12 @@ class MyTextSanitizer
 		if ($html != 1) {
 			// html not allowed
 //nobunobu for modPukiWiki
-//			$text =& $this->htmlSpecialChars($text);
-			$text =& $this->renderWikistyle($text, $xcode, $image);
-			$br = 0;
+			if ($xcode) {
+				$text =& $this->renderWikistyle($text, $xcode, $image, $br);
+				$br = 0;
+			} else {
+				$text =& $this->htmlSpecialChars($text);
+			}
 		} else {
 			$text =& $this->codePreConv($text, $xcode); // Ryuji_edit(2003-11-18)
 //nobunobu for modPukiWiki END
@@ -352,7 +356,7 @@ class MyTextSanitizer
 			// html not allowed
 //nobunobu for modPukiWiki
 			if ($xcode) {
-				$text =& $this->renderWikistyle($text, $xcode, $image);
+				$text =& $this->renderWikistyle($text, $xcode, $image, $br);
 				$br = 0;
 			} else {
 				$text =& $this->htmlSpecialChars($text);
