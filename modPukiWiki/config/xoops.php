@@ -1,14 +1,22 @@
 <?php
-// レンダリングキャッシュを有効にする
-	$_settings['use_cache'] = 0;
+//XOOPS固有の設定(以下の２つは変えない事を推奨
 /////////////////////////////////////////////////
 // 改行を反映する(改行を<br />に置換する)
-	$_settings['line_break'] = 1;
+	PukiWikiConfig::setParam('line_break',1);
+/////////////////////////////////////////////////
+// URLの自動リンク生成はmodPukiWiki側では行わない
+	PukiWikiConfig::setParam('autourllink',0);
+	
+//カストマイズ可能な代表的な設定例
+/////////////////////////////////////////////////
+// AutoLinkを有効にする場合は、AutoLink対象となる
+// ページ名の最短バイト数を指定
+// AutoLinkを無効にする場合は0
+//	PukiWikiConfig::setParam('autolink',3);
 /////////////////////////////////////////////////
 // 拡張テーブル書式を使用する
-	$_settings['ExtTable'] = true;
-// AutoLinkを無効にする場合は0
-	$_settings['autolink'] = 3;
-//
-	$_settings['autourllink'] = 0;
+//	PukiWikiConfig::setParam('ExtTable',true);
+/////////////////////////////////////////////////
+// レンダリングキャッシュを有効にする
+//	PukiWikiConfig::setParam('use_cache',1);
 ?>

@@ -16,10 +16,6 @@ class PukiWikiRender {
 	function PukiWikiRender($config='') {
 		//デフォルトの設定ファイル読込
 		require (MOD_PUKI_DEFAULT);
-		//コンストラクタのパラメータで$configが指定されている場合は、読み込む。
-		if ($config and file_exists(MOD_PUKI_CONFIG_DIR.$config.".php")) {
-			include (MOD_PUKI_CONFIG_DIR.$config.".php");
-		}
 		PukiWikiConfig::initParams();
 		foreach($_settings as $key=>$value) {
 			PukiWikiConfig::setParam($key,$value);
@@ -29,6 +25,10 @@ class PukiWikiRender {
 		
 		PukiWikiConfig::initInterWiki();
 		$this->_body = &new PukiWikiBody($this,1);
+		//コンストラクタのパラメータで$configが指定されている場合は、読み込む。
+		if ($config and file_exists(MOD_PUKI_CONFIG_DIR.$config.".php")) {
+			include (MOD_PUKI_CONFIG_DIR.$config.".php");
+		}
 	}
 
 	function transform($wikistr) {
