@@ -213,15 +213,19 @@ class PukiWikiLink
 			if (PukiWikiFunc::is_local_page($page)) {
 				$passage = "";
 				$title = PukiWikiConfig::getParam('link_compact') ? '' : " title=\"$s_page$passage\"";
-				$url = sprintf(PukiWikiConfig::getParam('LocalShowURL'),$r_page);
-				return "<a href=\"$url$anchor\"$title>$s_alias</a>";
+				$url = sprintf(PukiWikiConfig::getParam('LocalShowURL'),$r_page.$anchor);
+				return "<a href=\"$url\"$title>$s_alias</a>";
 			}
 		}
 		if (defined('MOD_PUKI_WIKI_URL')) {
 			if (PukiWikiFunc::is_page($page)) {
 				$passage = "";
 				$title = PukiWikiConfig::getParam('link_compact') ? '' : " title=\"$s_page$passage\"";
-				return "<a href=\"".MOD_PUKI_WIKI_URL."?$r_page$anchor\"$title>$s_alias</a>";
+				if (defined('XOOPS_URL') and MOD_PUKI_WIKI_VER=='1.3' and PukiWikiConfig::getParam('use_static_url')) {
+					return "<a href=\"".XOOPS_URL.'/modules/pukiwiki/'.PukiWikiFunc::get_pgid_by_name($page).".html{$anchor}\"$title>$s_alias</a>";
+				} else {
+					return "<a href=\"".MOD_PUKI_WIKI_URL."?$r_page$anchor\"$title>$s_alias</a>";
+				}
 			} else {
 				$retval = "$s_alias<a href=\"".MOD_PUKI_WIKI_URL."?cmd=edit&amp;page=$r_page$r_refer\">".PukiWikiConfig::getParam('_symbol_noexists')."</a>";
 				if (!PukiWikiConfig::getParam('link_compact')) {
@@ -231,7 +235,7 @@ class PukiWikiLink
 			}
 		} else {
 			return $s_alias;
-		}
+			}
 	}
 }
 // インラインプラグイン
@@ -528,15 +532,19 @@ class PukiWikiLink_wikiname extends PukiWikiLink
 			if (PukiWikiFunc::is_local_page($page)) {
 				$passage = "";
 				$title = PukiWikiConfig::getParam('link_compact') ? '' : " title=\"$s_page$passage\"";
-				$url = sprintf(PukiWikiConfig::getParam('LocalShowURL'),$r_page);
-				return "<a href=\"$url$anchor\"$title>$s_alias</a>";
+				$url = sprintf(PukiWikiConfig::getParam('LocalShowURL'),$r_page.$anchor);
+				return "<a href=\"$url\"$title>$s_alias</a>";
 			}
 		}
 		if (defined('MOD_PUKI_WIKI_URL')) {
 			if (PukiWikiFunc::is_page($page)) {
 				$passage = "";
 				$title = PukiWikiConfig::getParam('link_compact') ? '' : " title=\"$s_page$passage\"";
-				return "<a href=\"".MOD_PUKI_WIKI_URL."?$r_page$anchor\"$title>$s_alias</a>";
+				if (defined('XOOPS_URL') and MOD_PUKI_WIKI_VER=='1.3' and PukiWikiConfig::getParam('use_static_url')) {
+					return "<a href=\"".XOOPS_URL.'/modules/pukiwiki/'.PukiWikiFunc::get_pgid_by_name($page).".html{$anchor}\"$title>$s_alias</a>";
+				} else {
+					return "<a href=\"".MOD_PUKI_WIKI_URL."?$r_page$anchor\"$title>$s_alias</a>";
+				}
 			} else {
 				// ページ作成リンクをつけないオプション追加 by nao-pon
 				if (PukiWikiConfig::getParam('makepage_link')) return $s_alias;

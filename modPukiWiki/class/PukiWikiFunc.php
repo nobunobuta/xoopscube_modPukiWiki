@@ -409,5 +409,19 @@ class PukiWikiFunc {
 		}
 		return $real_pages[$page];
 	}
+	//ページ名からページIDを求める(PukiWikiMod専用)
+	function get_pgid_by_name($page)
+	{
+		global $xoopsDB;
+		static $page_id = array();
+		$page = addslashes(PukiWikiFunc::strip_bracket($page));
+		if (!empty($page_id[$page])) return $page_id[$page];
+		$query = "SELECT * FROM ".$xoopsDB->prefix("pukiwikimod_pginfo")." WHERE name='$page' LIMIT 1;";
+		$res = $xoopsDB->query($query);
+		if (!$res) return 0;
+		$ret = mysql_fetch_row($res);
+		$page_id[$page] = $ret[0];
+		return $ret[0];
+	}
 }
 ?>
