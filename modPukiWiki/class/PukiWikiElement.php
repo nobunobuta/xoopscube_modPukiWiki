@@ -165,8 +165,8 @@ class PukiWikiHeading extends PukiWikiElement
 	{
 		parent::PukiWikiElement();
 		
-		$this->level = min(6, strspn($text, '*'));
-		list($text, $this->msg_top, $this->id) = $root->getAnchor($text, $this->level);
+		$this->level  = min(6, strspn($text, '*'));
+		@list($text, $this->msg_top, $this->id )= $root->getAnchor($text, $this->level);
 		$this->insert(new PukiWikiInline($text));
 	}
 
@@ -753,36 +753,35 @@ class PukiWikiTable extends PukiWikiElement
 	// テーブル入れ子用の連結
 	function table_inc_add ($arytable)
 	{
-		//}{で囲んだ場合は、同じセル内＝テーブルを入れ子にできる。
+		// }{で囲んだ場合は、同じセル内＝テーブルを入れ子にできる。
 		$td_level = 0 ;
 		$lines_tmp = array();
 		$td_tmp = "";
 		foreach($arytable as $td){
-			if (preg_match("/^\}([^|]*)$/",$td,$reg)) {
+			if (preg_match('/^\}([^|]*)$/',$td,$reg)) {
 				$td_level += 1;
 				if ($td_level == 1) $td = $reg[1];
 			}
-			if (preg_match("/^([^|]*)\{$/",$td,$reg)) {
+			if (preg_match('/^([^|]*)\{$/',$td,$reg)) {
 				$td_level -= 1;
 				if ($td_level == 0) $td = $reg[1];
 			}
 			if ($td_level) {
-				if ($td_level == 1){
+				if ($td_level == 1) {
 					//表内であるかの判定
-					if (preg_match("/^.*___td_br___$/",$td) || preg_match("/^___td_br___.*$/",$td)) {
+					if (preg_match('/^.*___td_br___$/',$td) || preg_match('/^___td_br___.*$/',$td)) {
 						$rep_str = "\n";
 					} else {
 						$rep_str = "->\n";
 					}
-					$td = preg_replace("/___td_br___([ #\-+*]|(___td_br___)+)/e","str_replace('___td_br___','$rep_str','$0')",$td);
-					$td_tmp .= str_replace("~___td_br___","~$rep_str",$td)."|";//ok
-					
+					$td = preg_replace('/___td_br___([ #\-+*]|(___td_br___)+)/e',"str_replace('___td_br___','$rep_str','$0')",$td);
+					$td_tmp .= str_replace('~___td_br___',"~$rep_str",$td)."|";
 				} else {
-					$td_tmp .= str_replace("___td_br___","->\n",$td)."|";
+					$td_tmp .= str_replace('___td_br___',"->\n",$td)."|";
 				}
 			} else {
 				$td_tmp .= $td;//ok
-				$td_tmp = str_replace("___td_br___","\n",$td_tmp);
+				$td_tmp = str_replace('___td_br___',"\n",$td_tmp);
 				$lines_tmp[] = $td_tmp;
 				$td_tmp = "";
 			}
