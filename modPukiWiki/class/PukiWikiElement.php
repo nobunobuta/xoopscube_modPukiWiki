@@ -7,6 +7,7 @@
 // modPukiWiki HTML生成用クラス群
 //
 // 修正元ファイル：PukiWiki 1.4のconvert_html.php
+// ORG: convert_html.php,v 1.3 2004/10/07 14:15:27 henoheno Exp $
 //
 class PukiWikiElement
 { // ブロック要素
@@ -27,12 +28,11 @@ class PukiWikiElement
 
 	function &add(&$obj)
 	{
-		if ($this->canContain($obj))
-		{
+		if ($this->canContain($obj)) {
 			return $this->insert($obj);
+		} else {
+			return $this->parent->add($obj);
 		}
-		
-		return $this->parent->add($obj);
 	}
 
 	function &insert(&$obj)
@@ -43,6 +43,7 @@ class PukiWikiElement
 		
 		return $this->last = &$obj->last;
 	}
+	
 	function canContain($obj)
 	{
 		return TRUE;
@@ -50,14 +51,13 @@ class PukiWikiElement
 
 	function wrap($string, $tag, $param = '', $canomit = TRUE)
 	{
-		return ($canomit and $string == '') ? '' : "<$tag$param>$string</$tag>";
+		return ($canomit && $string == '') ? '' : "<$tag$param>$string</$tag>";
 	}
 
 	function toString()
 	{
 		$ret = array();
-		foreach (array_keys($this->elements) as $key)
-		{
+		foreach (array_keys($this->elements) as $key) {
 			$ret[] = $this->elements[$key]->toString();
 		}
 		
@@ -70,8 +70,7 @@ class PukiWikiElement
 		
 		$indent += 2;
 		
-		foreach (array_keys($this->elements) as $key)
-		{
+		foreach (array_keys($this->elements) as $key) {
 			$ret .= is_object($this->elements[$key]) ?
 				$this->elements[$key]->dump($indent) : '';
 				//str_repeat(' ',$indent).$this->elements[$key];
@@ -80,40 +79,77 @@ class PukiWikiElement
 		return $ret;
 	}
 }
+function & Factory_PukiWikiInline($text)
+{
+	if (substr($text, 0, 1) == '~') {
+		// 行頭 '~' 。パラグラフ開始
+		return new PukiWikiParagraph(' ' . substr($text, 1));
+	} else {
+		return new PukiWikiInline($text);
+	}
+}
 
+function & Factory_PukiWikiDList(& $root, $text)
+{
+	$out = explode('|', ltrim($text), 2);
+	if (count($out) < 2) {
+		return Factory_PukiWikiInline($text);
+	} else {
+		return new PukiWikiDList($out);
+	}
+}
+
+function & Factory_PukiWikiTable(& $root, $text)
+{
+	if (! preg_match("/^\|(.+)\|([hHfFcC]?)$/", $text, $out)) {
+		return Factory_PukiWikiInline($text);
+	} else {
+		return new PukiWikiTable($out);
+	}
+}
+
+function & Factory_PukiWikiYTable(& $root, $text)
+{
+	$_value = csv_explode(',', substr($text, 1));
+	if (count($_value) == 0) {
+		return Factory_PukiWikiInline($text);
+	} else {
+		return new PukiWikiYTable($_value);
+	}
+}
+
+function & Factory_PukiWikiDiv(& $root, $text)
+{
+	if (! preg_match("/^\#([^\(]+)(?:\((.*)\))?/", $text, $out) || ! exist_plugin_convert($out[1])) {
+		return new PukiWikiParagraph($text);
+	} else {
+		return new PukiWikiDiv($out);
+	}
+}
+
+// インライン要素
 class PukiWikiInline extends PukiWikiElement
-{ // インライン要素
-
+{ 
 	function PukiWikiInline($text)
 	{
 		parent::PukiWikiElement();
-		
-		if (substr($text,0,1) == '~') // 行頭~。パラグラフ開始
-		{
-			$this = new PukiWikiParagraph(' '.substr($text,1));
-			$this->last = &$this;
-			
-			return;
-		}
 		$this->elements[] = trim((substr($text, 0, 1) == "\n") ? $text : PukiWikiFunc::make_link($text));
 	}
 
 	function &insert(&$obj)
 	{
 		$this->elements[] = $obj->elements[0];
-		
 		return $this;
 	}
 
 	function canContain($obj)
 	{
-		return is_a($obj,'PukiWikiInline');
+		return is_a($obj, 'PukiWikiInline');
 	}
 
 	function toString()
 	{
-		$str = join(PukiWikiConfig::getParam('line_break') ? "<br />\n" : "\n",$this->elements);
-		return $str;
+		return join(PukiWikiConfig::getParam('line_break') ? "<br />\n" : "\n", $this->elements);
 	}
 
 	function &toPara($class = '')
@@ -133,20 +169,18 @@ class PukiWikiParagraph extends PukiWikiElement
 		parent::PukiWikiElement();
 		
 		$this->param = $param;
-		if ($text == '')
-		{
-			return;
-		}
+
+		if ($text == '') return;
+
 		if (substr($text,0,1) == '~')
-		{
 			$text = ' '.substr($text, 1);
-		}
-		$this->insert(new PukiWikiInline($text));
+
+		$this->insert(Factory_PukiWikiInline($text));
 	}
 
 	function canContain($obj)
 	{
-		return is_a($obj,'PukiWikiInline');
+		return is_a($obj, 'PukiWikiInline');
 	}
 
 	function toString()
@@ -155,19 +189,25 @@ class PukiWikiParagraph extends PukiWikiElement
 	}
 }
 
+// * Heading1
+// ** Heading2
+// *** Heading3
+// **** Heading4
+// ***** Heading5
+// ****** Heading6
 class PukiWikiHeading extends PukiWikiElement
-{ // *
+{
 	var $level;
 	var $id;
 	var $msg_top;
 	
-	function PukiWikiHeading(&$root, $text)
+	function PukiWikiHeading(& $root, $text)
 	{
 		parent::PukiWikiElement();
 		
 		$this->level  = min(6, strspn($text, '*'));
 		@list($text, $this->msg_top, $this->id )= $root->getAnchor($text, $this->level);
-		$this->insert(new PukiWikiInline($text));
+		$this->insert(Factory_PukiWikiInline($text));
 	}
 
 	function &insert(&$obj)
@@ -183,12 +223,13 @@ class PukiWikiHeading extends PukiWikiElement
 
 	function toString()
 	{
-		return $this->msg_top.$this->wrap(parent::toString(), 'h'.$this->level, " id=\"{$this->id}\" class=\"".PukiWikiConfig::getParam('style_prefix')."head\"");
+		return $this->msg_top . $this->wrap(parent::toString(), 'h' . $this->level, " id=\"{$this->id}\" class=\"".PukiWikiConfig::getParam('style_prefix')."head\"");
 	}
 }
 
+// ----
 class PukiWikiHRule extends PukiWikiElement
-{ // ----
+{
 
 	function PukiWikiHRule(&$root, $text)
 	{
@@ -233,15 +274,13 @@ class PukiWikiListContainer extends PukiWikiElement
 		
 		parent::insert(new PukiWikiListElement($this->level, $tag2));
 		if ($text != '')
-		{
-			$this->last = &$this->last->insert(new PukiWikiInline($text));
-		}
+			$this->last =& $this->last->insert(Factory_PukiWikiInline($text));
 	}
 	
 	function canContain(&$obj)
 	{
-		return (!is_a($obj, 'PukiWikiListContainer')
-			or ($this->tag == $obj->tag and $this->level == $obj->level));
+		return (! is_a($obj, 'PukiWikiListContainer')
+			|| ($this->tag == $obj->tag && $this->level == $obj->level));
 	}
 
 	function setParent(&$parent)
@@ -249,13 +288,11 @@ class PukiWikiListContainer extends PukiWikiElement
 		parent::setParent($parent);
 		
 		$step = $this->level;
-		if (isset($parent->parent) and is_a($parent->parent, 'PukiWikiListContainer'))
-		{
+		if (isset($parent->parent) && is_a($parent->parent, 'PukiWikiListContainer')) {
 			$step -= $parent->parent->level;
 		}
 		$margin = $this->margin * $step;
-		if ($step == $this->level)
-		{
+		if ($step == $this->level) {
 			$margin += $this->left_margin;
 		}
 		$this->style = sprintf(PukiWikiConfig::getParam('_list_pad_str'), $this->level, $margin, $margin);
@@ -264,20 +301,16 @@ class PukiWikiListContainer extends PukiWikiElement
 	function &insert(&$obj)
 	{
 		if (!is_a($obj, get_class($this)))
-		{
 			return $this->last = &$this->last->insert($obj);
-		}
+
         // 行頭文字のみの指定時はUL/OLブロックを脱出
         // BugTrack/524 
-		if (count($obj->elements) == 1 && count($obj->elements[0]->elements) == 0)
-		{
+		if (count($obj->elements) == 1 && empty($obj->elements[0]->elements))
 			return $this->last->parent; // up to PukiWikiListElement.
-		}
+
 		// move elements.
 		foreach(array_keys($obj->elements) as $key)
-		{
 			parent::insert($obj->elements[$key]);
-		}
 		
 		return $this->last;
 	}
@@ -299,7 +332,7 @@ class PukiWikiListElement extends PukiWikiElement
 
 	function canContain(&$obj)
 	{
-		return (!is_a($obj, 'PukiWikiListContainer') or ($obj->level > $this->level));
+		return (! is_a($obj, 'PukiWikiListContainer') || ($obj->level > $this->level));
 	}
 
 	function toString()
@@ -308,49 +341,52 @@ class PukiWikiListElement extends PukiWikiElement
 	}
 }
 
+// - One
+// - Two
+// - Three
 class PukiWikiUList extends PukiWikiListContainer
-{ // -
+{
 	function PukiWikiUList( &$root, $text)
 	{
 		parent::PukiWikiListContainer('ul', 'li', '-', $text);
 	}
 }
 
+// + One
+// + Two
+// + Three
 class PukiWikiOList extends PukiWikiListContainer
-{ // +
+{
 	function PukiWikiOList( &$root, $text)
 	{
 		parent::PukiWikiListContainer('ol', 'li', '+', $text);
 	}
 }
 
+// : definition1 | description1
+// : definition2 | description2
+// : definition3 | description3
 class PukiWikiDList extends PukiWikiListContainer
-{ // :
-	function PukiWikiDList( &$root, $text)
+{
+	function PukiWikiDList($out)
 	{
-		$out = explode('|', $text, 2);
-		if (count($out) < 2)
-		{
-			$this = new PukiWikiInline($text);
-			$this->last = &$this;
-			
-			return;
-		}
 		parent::PukiWikiListContainer('dl', 'dt', ':', $out[0]);
 		
 		$this->last = &PukiWikiElement::insert(new PukiWikiListElement($this->level, 'dd'));
 		if ($out[1] != '')
 		{
-			$this->last = &$this->last->insert(new PukiWikiInline($out[1]));
+			$this->last =& $this->last->insert(Factory_PukiWikiInline($out[1]));
 		}
 	}
 }
 
+// > Someting cited
+// > like E-mail text
 class PukiWikiBQuote extends PukiWikiElement
-{ // >
+{
 	var $level;
 	
-	function PukiWikiBQuote( &$root, $text)
+	function PukiWikiBQuote(& $root, $text)
 	{
 		parent::PukiWikiElement();
 		
@@ -358,40 +394,32 @@ class PukiWikiBQuote extends PukiWikiElement
 		$this->level = min(3, strspn($text, $head));
 		$text = ltrim(substr($text, $this->level));
 		
-		if ($head == '<') //blockquote close
-		{
+		if ($head == '<') {//Blockquote close
 			$level = $this->level;
 			$this->level = 0;
 			$this->last = &$this->end($root, $level);
 			if ($text != '')
-			{
-				$this->last = &$this->last->insert(new PukiWikiInline($text));
-			}
-		}
-		else
-		{
-			$this->insert(new PukiWikiInline($text));
+				$this->last = &$this->last->insert(Factory_PukiWikiInline($text));
+		} else {
+			$this->insert(Factory_PukiWikiInline($text));
 		}
 	}
 
 	function canContain(&$obj)
 	{
-		return (!is_a($obj, get_class($this)) or $obj->level >= $this->level);
+		return (! is_a($obj, get_class($this)) || $obj->level >= $this->level);
 	}
 
 	function &insert(&$obj)
 	{
         // BugTrack/521, BugTrack/545
-		if (is_a($obj, 'PukiWikiInline')) {
+		if (is_a($obj, 'PukiWikiInline'))
         	return parent::insert($obj->toPara(' class="'.PukiWikiConfig::getParam('style_prefix').'quotation"'));
-        }
-		if (is_a($obj, 'PukiWikiBQuote') and $obj->level == $this->level and count($obj->elements))
-		{
+
+		if (is_a($obj, 'PukiWikiBQuote') && $obj->level == $this->level && count($obj->elements)) {
 			$obj = &$obj->elements[0];
-			if (is_a($this->last,'PukiWikiParagraph') and count($obj->elements))
-			{
+			if (is_a($this->last, 'PukiWikiParagraph') && count($obj->elements))
 				$obj = &$obj->elements[0];
-			}
 		}
 		return parent::insert($obj);
 	}
@@ -405,12 +433,9 @@ class PukiWikiBQuote extends PukiWikiElement
 	{
 		$parent = &$root->last;
 		
-		while (is_object($parent))
-		{
-			if (is_a($parent,'PukiWikiBQuote') and $parent->level == $level)
-			{
+		while (is_object($parent)) {
+			if (is_a($parent, 'PukiWikiBQuote') && $parent->level == $level)
 				return $parent->parent;
-			}
 			$parent = &$parent->parent;
 		}
 		return $this;
@@ -424,7 +449,7 @@ class PukiWikiTableCell extends PukiWikiElement
 	var $rowspan = 1;
 	var $style; // is array('width'=>, 'align'=>...);
 	
-	function PukiWikiTableCell( $text, $is_template = FALSE)
+	function PukiWikiTableCell($text, $is_template = FALSE)
 	{
 		parent::PukiWikiElement();
 		$this->style = $matches = array();
@@ -450,34 +475,26 @@ class PukiWikiTableCell extends PukiWikiElement
 				$text = $matches[5];
 			}
 		}
-		if ($is_template and is_numeric($text))
-		{
+		if ($is_template && is_numeric($text)) {
 			$this->style['width'] = "width:{$text}px;";
 		}
-		if ($text == '>')
-		{
+		
+		if ($text == '>') {
 			$this->colspan = 0;
-		}
-		else if ($text == '~')
-		{
+		} else if ($text == '~') {
 			$this->rowspan = 0;
-		}
-		else if (substr($text, 0, 1) == '~')
-		{
+		} else if (substr($text, 0, 1) == '~') {
 			$this->tag = 'th';
 			$text = substr($text, 1);
 		}
-		if ($text != '' and $text{0} == '#')
-		{
+
+		if ($text != '' && $text{0} == '#') {
 			// セル内容が'#'で始まるときはPukiWikiDivクラスを通してみる
-			$obj = &new PukiWikiDiv($this, $text);
-			if (is_a($obj, 'PukiWikiParagraph'))
-			{
+			$obj =& Factory_PukiWikiDiv($this, $text);
+			if (is_a($obj, 'PukiWikiParagraph')) {
 				$obj = &$obj->elements[0];
 			}
-		}
-		else if (preg_match("/\n/", $text,$match) and PukiWikiConfig::getParam("ExtTable"))
-		{
+		} else if (preg_match("/\n/", $text,$match) and PukiWikiConfig::getParam("ExtTable")) {
 //			echo $string."<br>\n";
 			$string = preg_replace("/(^|\n)(\|[^\r]+?\|)(\n[^|]|$)/e","'$1'.stripslashes(str_replace('->\n','___td_br___','$2')).'$3'",$text);
 //			echo $string."<br>\n";
@@ -485,43 +502,34 @@ class PukiWikiTableCell extends PukiWikiElement
 			$lines = explode("\n", $string);
 			$obj = &new PukiWikiBody(2);
 			$obj->parse($lines);
+		} else {
+			$obj =& Factory_PukiWikiInline($text);
 		}
-		else
-		{
-			$obj = &new PukiWikiInline($text);
-		}
+
 		$this->insert($obj);
 	}
 
 	function setStyle(&$style)
 	{
-		foreach ($style as $key=>$value)
-		{
-			if (!array_key_exists($key, $this->style))
-			{
+		foreach ($style as $key=>$value) {
+			if (! isset($this->style[$key]))
 				$this->style[$key] = $value;
-			}
 		}
 	}
 
 	function toString()
 	{
-		if ($this->rowspan == 0 or $this->colspan == 0)
-		{
-			return '';
-		}
+		if ($this->rowspan == 0 || $this->colspan == 0) return '';
+
 		$param = " class=\"".PukiWikiConfig::getParam('style_prefix')."style_{$this->tag}\"";
-		if ($this->rowspan > 1)
-		{
+		if ($this->rowspan > 1) {
 			$param .= " rowspan=\"{$this->rowspan}\"";
 		}
-		if ($this->colspan > 1)
-		{
+		if ($this->colspan > 1) {
 			$param .= " colspan=\"{$this->colspan}\"";
 			unset($this->style['width']);
 		}
-		if (count($this->style))
-		{
+		if (! empty($this->style)) {
 			$param .= ' style="'.join(' ', $this->style).'"';
 		}
 		
@@ -617,27 +625,22 @@ class PukiWikiTableCell extends PukiWikiElement
 	}
 }
 
+// | title1 | title2 | title3 |
+// | cell1  | cell2  | cell3  |
+// | cell4  | cell5  | cell6  |
 class PukiWikiTable extends PukiWikiElement
-{ // |
+{
 	var $type;
 	var $types;
 	var $col; // number of column
 	var $table_around,$table_sheet,$table_style,$div_style,$table_align;
 	
 	
-	function PukiWikiTable( &$root, $text)
+	function PukiWikiTable($out)
 	{
 		parent::PukiWikiElement();
 		
-		$out = array();
 //		echo $text."<br/>\n";
-		if (!preg_match("/^\|(.+)\|([hHfFcC]?)$/", $text, $out))
-		{
-			$this = new PukiWikiInline($text);
-			$this->last = &$this;
-			
-			return;
-		}
 		if (PukiWikiConfig::getParam("ExtTable")) {
 //			echo $out[1]."\n";
 			$cells = $this->table_inc_add(explode('|', $out[1]));
@@ -653,8 +656,7 @@ class PukiWikiTable extends PukiWikiElement
 		$this->types = array($this->type);
 		$is_template = ($this->type == 'c');
 		$row = array();
-		foreach ($cells as $cell)
-		{
+		foreach ($cells as $cell) {
 			$row[] = &new PukiWikiTableCell($cell, $is_template);
 		}
 		$this->elements[] = $row;
@@ -662,14 +664,13 @@ class PukiWikiTable extends PukiWikiElement
 
 	function canContain(&$obj)
 	{
-		return is_a($obj, 'PukiWikiTable') and ($obj->col == $this->col);
+		return is_a($obj, 'PukiWikiTable') && ($obj->col == $this->col);
 	}
 
 	function &insert(&$obj)
 	{
 		$this->elements[] = $obj->elements[0];
 		$this->types[] = $obj->type;
-		
 		return $this;
 	}
 
@@ -678,69 +679,56 @@ class PukiWikiTable extends PukiWikiElement
 		static $parts = array('h'=>'thead', 'f'=>'tfoot', ''=>'tbody');
 		
 		// rowspanを設定(下から上へ)
-		for ($ncol = 0; $ncol < $this->col; $ncol++)
-		{
+		for ($ncol = 0; $ncol < $this->col; $ncol++) {
 			$rowspan = 1;
-			foreach (array_reverse(array_keys($this->elements)) as $nrow)
-			{
+			foreach (array_reverse(array_keys($this->elements)) as $nrow) {
 				$row = &$this->elements[$nrow];
-				if ($row[$ncol]->rowspan == 0)
-				{
-					$rowspan++;
+				if ($row[$ncol]->rowspan == 0) {
+					++$rowspan;
 					continue;
 				}
 				$row[$ncol]->rowspan = $rowspan;
-				while (--$rowspan) // 行種別を継承する
-				{
+				while (--$rowspan) { // 行種別を継承する
 					$this->types[$nrow + $rowspan] = $this->types[$nrow];
 				}
 				$rowspan = 1;
 			}
 		}
+
 		// colspan,styleを設定
 		$stylerow = NULL;
-		foreach (array_keys($this->elements) as $nrow)
-		{
+		foreach (array_keys($this->elements) as $nrow) {
 			$row = &$this->elements[$nrow];
-			if ($this->types[$nrow] == 'c')
-			{
+			if ($this->types[$nrow] == 'c') {
 				$stylerow = &$row;
 			}
 			$colspan = 1;
-			foreach (array_keys($row) as $ncol)
-			{
-				if ($row[$ncol]->colspan == 0)
-				{
-					$colspan++;
+			foreach (array_keys($row) as $ncol) {
+				if ($row[$ncol]->colspan == 0) {
+					++$colspan;
 					continue;
 				}
 				$row[$ncol]->colspan = $colspan;
-				if ($stylerow !== NULL)
-				{
+				if ($stylerow !== NULL) {
 					$row[$ncol]->setStyle($stylerow[$ncol]->style);
-					while (--$colspan) // 列スタイルを継承する
-					{
+					while (--$colspan) {// 列スタイルを継承する
 						$row[$ncol - $colspan]->setStyle($stylerow[$ncol]->style);
 					}
 				}
 				$colspan = 1;
 			}
 		}
+
 		// テキスト化
 		$string = '';
-		foreach ($parts as $type => $part)
-		{
+		foreach ($parts as $type => $part) {
 			$part_string = '';
-			foreach (array_keys($this->elements) as $nrow)
-			{
-				if ($this->types[$nrow] != $type)
-				{
+			foreach (array_keys($this->elements) as $nrow) {
+				if ($this->types[$nrow] != $type) 
 					continue;
-				}
 				$row = &$this->elements[$nrow];
 				$row_string = '';
-				foreach (array_keys($row) as $ncol)
-				{
+				foreach (array_keys($row) as $ncol) {
 					$row_string .= $row[$ncol]->toString();
 				}
 				$part_string .= $this->wrap($row_string, 'tr');
@@ -748,6 +736,7 @@ class PukiWikiTable extends PukiWikiElement
 			$string .= $this->wrap($part_string, $part);
 		}
 		$string = $this->wrap($string, 'table', ' class="'.PukiWikiConfig::getParam('style_prefix').'style_table"'."$this->table_style style=\"$this->table_sheet\"");
+		
 		return $this->wrap($string, 'div', ' class="'.PukiWikiConfig::getParam('style_prefix').'ie5" '.$this->div_style).$this->table_around;
 	}
 	// テーブル入れ子用の連結
@@ -881,52 +870,40 @@ class PukiWikiTable extends PukiWikiElement
 	}
 }
 
+// , title1 , title2 , title3
+// , cell1  , cell2  , cell3
+// , cell4  , cell5  , cell6
 class PukiWikiYTable extends PukiWikiElement
-{ // ,
+{
 	var $col;
 	
-	function PukiWikiYTable( &$root, $text)
+	function PukiWikiYTable($_value)
 	{
 		parent::PukiWikiElement();
 		
-		$_value = PukiWikiFunc::csv_explode(',', substr($text,1));
-		if (count($_value) == 0)
-		{
-			$this = new PukiWikiInline($text);
-			$this->last = &$this;
-			
-			return;
-		}
 		$align = $value = $matches = array();
-		foreach($_value as $val)
-		{
-			if (preg_match('/^(\s+)?(.+?)(\s+)?$/', $val, $matches))
-			{
+		foreach($_value as $val) {
+			if (preg_match('/^(\s+)?(.+?)(\s+)?$/', $val, $matches)) {
 				$align[] =($matches[1] != '') ?
-					((array_key_exists(3,$matches) and $matches[3] != '') ?
-						' style="text-align:center"' : ' style="text-align:right"'
+					((isset($matches[3]) && $matches[3] != '') ?
+						' style="text-align:center"' :
+						' style="text-align:right"'
 					) : '';
 				$value[] = $matches[2];
-			}
-			else
-			{
+			} else {
 				$align[] = '';
 				$value[] = $val;
 			}
 		}
 		$this->col = count($value);
 		$colspan = array();
-		foreach ($value as $val)
-		{
+		foreach ($value as $val) {
 			$colspan[] = ($val == '==') ? 0 : 1;
 		}
 		$str = '';
-		for ($i = 0; $i < count($value); $i++)
-		{
-			if ($colspan[$i])
-			{
-				while ($i + $colspan[$i] < count($value) and $value[$i + $colspan[$i]] == '==')
-				{
+		for ($i = 0; $i < count($value); $i++) {
+			if ($colspan[$i]) {
+				while ($i + $colspan[$i] < count($value) && $value[$i + $colspan[$i]] == '==') {
 					$colspan[$i]++;
 				}
 				$colspan[$i] = ($colspan[$i] > 1) ? " colspan=\"{$colspan[$i]}\"" : '';
@@ -938,21 +915,19 @@ class PukiWikiYTable extends PukiWikiElement
 
 	function canContain(&$obj)
 	{
-		return is_a($obj, 'PukiWikiYTable') and ($obj->col == $this->col);
+		return is_a($obj, 'PukiWikiYTable') && ($obj->col == $this->col);
 	}
 
 	function &insert(&$obj)
 	{
 		$this->elements[] = $obj->elements[0];
-		
 		return $this;
 	}
 
 	function toString()
 	{
 		$rows = '';
-		foreach ($this->elements as $str)
-		{
+		foreach ($this->elements as $str) {
 			$rows .= "\n<tr class=\"".PukiWikiConfig::getParam('style_prefix')."style_tr\">$str</tr>\n";
 		}
 		$rows = $this->wrap($rows, 'table', ' class="'.PukiWikiConfig::getParam('style_prefix').'style_table" cellspacing="1" border="0"');
@@ -960,13 +935,16 @@ class PukiWikiYTable extends PukiWikiElement
 	}
 }
 
+// ' 'Space-beginning sentence
+// ' 'Space-beginning sentence
+// ' 'Space-beginning sentence
 class PukiWikiPre extends PukiWikiElement
-{ // ' '
-	function PukiWikiPre( &$root,$text)
+{
+	function PukiWikiPre(& $root, $text)
 	{
 		parent::PukiWikiElement();
 		$this->elements[] = htmlspecialchars(
-			(!PukiWikiConfig::getParam('preformat_ltrim') or $text == '' or $text{0} != ' ') ? $text : substr($text, 1)
+			(! PukiWikiConfig::getParam('preformat_ltrim') || $text == '' || $text{0} != ' ') ? $text : substr($text, 1)
 		);
 	}
 
@@ -978,7 +956,6 @@ class PukiWikiPre extends PukiWikiElement
 	function &insert(&$obj)
 	{
 		$this->elements[] = $obj->elements[0];
-		
 		return $this;
 	}
 
@@ -1004,22 +981,15 @@ class PukiWikiPre extends PukiWikiElement
 	}
 }
 
+// #someting(started with '#')
 class PukiWikiDiv extends PukiWikiElement
-{ // #
+{
 	var $name;
 	var $param;
 	
-	function PukiWikiDiv( &$root, $text)
+	function PukiWikiDiv($out)
 	{
 		parent::PukiWikiElement();
-		
-		if (!preg_match("/^\#([^\(]+)(?:\((.*)\))?/", $text, $out) or !PukiWikiPlugin::exist_plugin_convert($out[1]))
-		{
-			$this = new PukiWikiParagraph($text);
-			$this->last = &$this;
-			
-			return;
-		}
 		list(, $this->name, $this->param) = array_pad($out,3,'');
 	}
 
@@ -1030,18 +1000,18 @@ class PukiWikiDiv extends PukiWikiElement
 
 	function toString()
 	{
-		return PukiWikiPlugin::do_plugin_convert($this->name,$this->param);
+		return PukiWikiPlugin::do_plugin_convert($this->name, $this->param);
 	}
 }
 
+// LEFT:/CENTER:/RIGHT:
 class PukiWikiAlign extends PukiWikiElement
-{ // LEFT:/CENTER:/RIGHT:
+{
 	var $align;
 	
 	function PukiWikiAlign( $align)
 	{
 		parent::PukiWikiElement();
-		
 		$this->align = $align;
 	}
 
@@ -1056,8 +1026,9 @@ class PukiWikiAlign extends PukiWikiElement
 	}
 }
 
+// Body
 class PukiWikiBody extends PukiWikiElement
-{ // PukiWikiBody
+{
 	var $id;
 	var $count = 0;
 	var $contents;
@@ -1065,18 +1036,20 @@ class PukiWikiBody extends PukiWikiElement
 	var $classes = array(
 		'-' => 'PukiWikiUList',
 		'+' => 'PukiWikiOList',
+		'>' => 'PukiWikiBQuote',
+		'<' => 'PukiWikiBQuote'
+	);
+	var $factories = array(
 		':' => 'PukiWikiDList',
 		'|' => 'PukiWikiTable',
 		',' => 'PukiWikiYTable',
-		'>' => 'PukiWikiBQuote',
-		'<' => 'PukiWikiBQuote',
 		'#' => 'PukiWikiDiv'
 	);
 	
 	function PukiWikiBody($id)
 	{
 		$this->id = $id;
-		$this->contents = &new PukiWikiElement();
+		$this->contents =& new PukiWikiElement();
 		$this->contents_last = &$this->contents;
 		parent::PukiWikiElement();
 	}
@@ -1084,70 +1057,73 @@ class PukiWikiBody extends PukiWikiElement
 	function parse(&$lines)
 	{
 		$this->last = &$this;
+		$matches = array();
 		
-		while (count($lines))
-		{
+		while (! empty($lines)) {
 			$line = array_shift($lines);
 			
-			if (substr($line,0,2) == '//') //コメントは処理しない
-			{
-				continue;
-			}
+			// Escape comments
+			if (substr($line, 0, 2) == '//') continue;
 			
-			if (preg_match('/^(LEFT|CENTER|RIGHT):(.*)$/',$line,$matches))
-			{
-				$this->last = &$this->last->add(new PukiWikiAlign(strtolower($matches[1]))); // <div style="text-align:...">
-				if ($matches[2] == '')
-				{
-					continue;
-				}
+			if (preg_match('/^(LEFT|CENTER|RIGHT):(.*)$/',$line,$matches)) {
+				// <div style="text-align:...">
+				$this->last = &$this->last->add(new PukiWikiAlign(strtolower($matches[1])));
+
+				if ($matches[2] == '') continue;
+
 				$line = $matches[2];
 			}
 			
 			$line = preg_replace("/[\r\n]*$/",'',$line);
 			
 			// Empty
-			if ($line == '')
-			{
+			if ($line == '') {
 				$this->last = &$this;
 				continue;
 			}
+
 			// Horizontal Rule
-			if (substr($line,0,4) == '----')
-			{
-				$this->insert(new PukiWikiHRule($this,$line));
+			if (substr($line,0,4) == '----') {
+				$this->insert(new PukiWikiHRule($this, $line));
 				continue;
 			}
-			// 行頭文字
+
+			// The first character
 			$head = $line{0};
 			
-			// PukiWikiHeading
-			if ($head == '*')
-			{
-				$this->insert(new PukiWikiHeading($this,$line));
+			// Heading
+			if ($head == '*') {
+				$this->insert(new PukiWikiHeading($this, $line));
 				continue;
 			}
-			// PukiWikiPre
-			if ($head == ' ' or $head == "\t")
-			{
-				$this->last = &$this->last->add(new PukiWikiPre($this,$line));
+			
+			// Pre
+			if ($head == ' ' || $head == "\t") {
+				$this->last = & $this->last->add(new PukiWikiPre($this,$line));
 				continue;
 			}
+			
 			// Line Break
-			if (substr($line,-1) == '~')
-			{
+			if (substr($line, -1) == '~') {
 				$line = substr($line,0,-1)."\r";
 			}
+			
 			// Other Character
-			if (array_key_exists($head, $this->classes))
-			{
+			if (isset($this->classes[$head])) {
 				$classname = $this->classes[$head];
 				$this->last = &$this->last->add(new $classname($this,$line));
 				continue;
 			}
 			
+			// Other Character
+			if (isset($this->factories[$head])) {
+				$factoryname = 'Factory_' . $this->factories[$head];
+				$this->last  = & $this->last->add($factoryname($this, $line));
+				continue;
+			}
+
 			// Default
-			$this->last = &$this->last->add(new PukiWikiInline($line));
+			$this->last =& $this->last->add(Factory_PukiWikiInline($line));
 		}
 	}
 
@@ -1165,10 +1141,7 @@ class PukiWikiBody extends PukiWikiElement
 
 	function &insert(&$obj)
 	{
-		if (is_a($obj, 'PukiWikiInline'))
-		{
-			$obj = &$obj->toPara();
-		}
+		if (is_a($obj, 'PukiWikiInline')) $obj = & $obj->toPara();
 		return parent::insert($obj);
 	}
 
@@ -1203,8 +1176,8 @@ class Contents_UList extends PukiWikiListContainer
 		// 行頭\nで整形済みを表す ... X(
 		PukiWikiFunc::make_heading($text);
 		$text = "\n<a href=\"#$id\">$text</a>\n";
-		parent::PukiWikiListContainer('ul', 'li', '-', str_repeat('-',$level));
-		$this->insert(new PukiWikiInline($text));
+		parent::PukiWikiListContainer('ul', 'li', '-', str_repeat('-', $level));
+		$this->insert(Factory_PukiWikiInline($text));
 	}
 
 	function setParent(&$parent)
@@ -1212,8 +1185,7 @@ class Contents_UList extends PukiWikiListContainer
 		parent::setParent($parent);
 		$step = $this->level;
 		$margin = $this->left_margin;
-		if (isset($parent->parent) and is_a($parent->parent,'PukiWikiListContainer'))
-		{
+		if (isset($parent->parent) && is_a($parent->parent, 'PukiWikiListContainer')) {
 			$step -= $parent->parent->level;
 			$margin = 0;
 		}

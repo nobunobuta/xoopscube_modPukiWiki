@@ -2,9 +2,11 @@
 /////////////////////////////////////////////////
 // PukiWiki - Yet another WikiWikiWeb clone.
 //
-// modPukiWikiリンク生成用クラス群
+// $Id$
 //
+// modPukiWikiリンク生成用クラス群
 // 修正元ファイル：PukiWiki 1.4のmake_link.php
+// ORG: make_link.php,v 1.2 2004/09/19 14:05:30 henoheno Exp $
 //
 
 //インライン要素を置換する
@@ -15,9 +17,27 @@ class PukiWikiInlineConverter
 	var $pos;
 	var $result;
 
-	function PukiWikiInlineConverter($converters=NULL,$excludes=NULL)
+	function get_clone($obj) {
+		static $clone_func;
+
+		if (!isset($clone_func)) {
+			if (version_compare(PHP_VERSION,'5.0.0','<')) {
+				$clone_func = create_function('$a','return $a;');
+			} else {
+				$clone_func = create_function('$a','return clone $a;');
+			}
+		}
+		return $clone_func($obj);
+	}
+	function __clone() {
+		$converters = array();
+		foreach ($this->converters as $key=>$converter) {
+			$converters[$key] = $this->get_clone($converter);
+		}
+		$this->converters = $converters;
+	}
+    function PukiWikiInlineConverter($converters=NULL,$excludes=NULL)
 	{
-		
 		if ($converters === NULL)
 		{
 			$converters = array(
@@ -91,7 +111,7 @@ class PukiWikiInlineConverter
 			$obj = $this->get_converter($match);
 			if ($obj->set($match,$page) !== FALSE)
 			{
-				$arr[] = $obj; // copy
+				$arr[] = $this->get_clone($obj);
 				if ($obj->body != '')
 				{
 					$arr = array_merge($arr,$this->get_objects($obj->body,$page));
@@ -147,12 +167,11 @@ class PukiWikiLink
 	}
 	
 	//private
-	// マッチした配列から、ｩ分に必要な部分だけを謔闖oす
+	// マッチした配列から、自分に必要な部分だけを取り出す
 	function splice($arr)
 	{
 		$count = $this->get_count() + 1;
 		$arr = array_pad(array_splice($arr,$this->start,$count),$count,'');
-//		var_dump ($arr);echo "<br>";
 		$this->text = $arr[0];
 		return $arr;
 	}
@@ -266,7 +285,7 @@ EOD;
 	{
 		list($all,$this->plain,$name,$this->param,$body) = $this->splice($arr);
 		
-		// 本来のプラグイン名およびパラメータを謫ｾしなおす PHP4.1.2 (?R)対策
+		// 本来のプラグイン名およびパラメータを取得しなおす PHP4.1.2 (?R)対策
 		if (preg_match("/^{$this->pattern}/x",$all,$matches)
 			and $matches[1] != $this->plain)
 		{
@@ -277,6 +296,7 @@ EOD;
 	function toString()
 	{
 		$body = ($this->body == '') ? '' : PukiWikiFunc::make_link($this->body);
+
 		// プラグイン呼び出し
 		if (PukiWikiPlugin::exist_plugin_inline($this->name))
 		{
@@ -287,7 +307,7 @@ EOD;
 			}
 		}
 		
-		// プラグインが存在しないか、変換にｸ敗
+		// プラグインが存在しないか、変換に失敗
 		$body = ($body == '') ? ';' : "\{$body};";
 		return PukiWikiConfig::applyRules(htmlspecialchars('&'.$this->plain).$body);
 	}
@@ -661,7 +681,7 @@ class PukiWikiLink_autolink_a extends PukiWikiLink_autolink
 		return isset($this->auto_a) ? "({$this->auto_a})" : FALSE;
 	}
 }
-// 注ﾟ
+// 注釈 
 class PukiWikiLink_note extends PukiWikiLink
 {
 	function PukiWikiLink_note($start)
