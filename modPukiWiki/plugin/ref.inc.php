@@ -41,13 +41,13 @@ Last-Update:2002-10-29 rev.33
 if (!defined('MOD_PUKI_REF_GD_VERSION')) define('MOD_PUKI_REF_GD_VERSION',2); // Ver 2
 
 // file icon image
-if (!defined('MOD_PUKI_REF_FILE_ICON')) define('REF_FILE_ICON','<img src="'.MOD_PUKI_FILE_ICON'." alt="file" width="20" height="20" />');
+if (!defined('MOD_PUKI_REF_FILE_ICON')) define('MOD_PUKI_REF_FILE_ICON','<img src="'.MOD_PUKI_FILE_ICON.'" alt="file" width="20" height="20" />');
 
 // default alignment
-if (!defined('MOD_PUKI_REF_DEFAULT_ALIGN')) define('REF_DEFAULT_ALIGN','left'); // 'left','center','right'
+if (!defined('MOD_PUKI_REF_DEFAULT_ALIGN')) define('MOD_PUKI_REF_DEFAULT_ALIGN','left'); // 'left','center','right'
 
 // force wrap on default
-if (!defined('MOD_PUKI_REF_WRAP_TABLE')) define('REF_WRAP_TABLE',FALSE); // TRUE,FALSE
+if (!defined('MOD_PUKI_REF_WRAP_TABLE')) define('MOD_PUKI_REF_WRAP_TABLE',FALSE); // TRUE,FALSE
 
 function plugin_ref_inline() {
 
@@ -100,7 +100,7 @@ function plugin_ref_convert() {
 	array_walk($args, 'ref_check_arg', &$params);
 
 	$rets = plugin_ref_body($name,$args,$params);
-	if ($rets['_error']) {
+	if (!empty($rets['_error'])) {
 		$ret = $rets['_error'];
 	} else {
 		$ret = $rets['_body'];
