@@ -60,6 +60,18 @@ class PukiWikiFunc {
 		return file_exists(PukiWikiFunc::get_filename($page));
 	}
 
+	// ローカルページのファイル名を得る
+	function get_local_filename($page)
+	{
+		return MOD_PUKI_DATA_DIR . PukiWikiFunc::encode($page) . '.txt';
+	}
+
+	// ローカルページが存在するか
+	function is_local_page($page,$reload=FALSE)
+	{
+		return file_exists(PukiWikiFunc::get_local_filename($page));
+	}
+
 	// ページ名のエンコード
 	function encode($key)
 	{
@@ -375,6 +387,27 @@ class PukiWikiFunc {
 			}
 		}
 		return TRUE;
+	}
+	// 共通リンクディレクトリの処理(該当フルネームを返す:ブラケットなし) by nao-pon
+	function get_real_pagename($page)
+	{
+		static $real_pages = array();
+		
+		$page = PukiWikiFunc::strip_bracket($page);
+		
+		if (isset($real_pages[$page])) return $real_pages[$page];
+		
+		$real_pages[$page] = false;
+		foreach(PukiWikiConfig::getParam('wiki_common_dirs') as $dir)
+		{
+			$check = $dir.$page;
+			if (PukiWikiFunc::is_page($check))
+			{
+				$real_pages[$page] = $check;
+				break;
+			}
+		}
+		return $real_pages[$page];
 	}
 }
 ?>
