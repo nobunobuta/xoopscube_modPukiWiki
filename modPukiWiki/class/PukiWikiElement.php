@@ -112,7 +112,9 @@ class PukiWikiInline extends PukiWikiElement
 
 	function toString()
 	{
-		return join(PukiWikiConfig::getParam('line_break') ? "<br />\n" : "\n",$this->elements);
+		$str = join(PukiWikiConfig::getParam('line_break') ? "<br />\n" : "\n",$this->elements);
+		$str .= PukiWikiConfig::getParam('line_break') ? "<br />\n" : "";
+		return $str;
 	}
 
 	function &toPara($class = '')
