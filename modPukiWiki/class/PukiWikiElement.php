@@ -563,6 +563,7 @@ class PukiWikiTableCell extends PukiWikiElement
 				else if (preg_match("/out/i",$tmp[3])) $border_type = "outset";
 				else if (preg_match("/dash/i",$tmp[3])) $border_type = "dashed";
 				else if (preg_match("/dott/i",$tmp[3])) $border_type = "dotted";
+				else $border_type = "outset";
 			} else {
 				$border_type = "outset";
 			}
@@ -575,10 +576,10 @@ class PukiWikiTableCell extends PukiWikiElement
 				}
 			}
 			if (array_key_exists (2,$tmp)) {
-				if ($reg[2]!=""){
-					$this->style['padding'] .= " padding:".$reg[2].";";
+				if ($tmp[2]!=""){
+					$this->style['padding'] = " padding:".$tmp[2].";";
 				} else {
-					$this->style['padding'] .= " padding:5px;";
+					$this->style['padding'] = " padding:5px;";
 				}
 			}
 			$cells[0] = preg_replace("/K:([0-9]+),?([0-9]*)(one|two|boko|deko|in|out|dash|dott)?/i","",$cells[0]);
@@ -591,22 +592,24 @@ class PukiWikiTableCell extends PukiWikiElement
 			$this->style['border-color'] = "border-color:".$tmp[1].";";
 			$cells[0] = preg_replace("/KC:(#?[0-9abcdef]{6}?|$colors_reg|0)/i","",$cells[0]);
 		}
+//		echo "CELL: {$cells[0]}\n";
 		// セル規定文字揃え、幅指定
-		if (preg_match("/(LEFT|CENTER|RIGHT)?:(TOP|MIDDLE|BOTTOM)?(?::)?([0-9]+[%]?)?/i",$cells[0],$tmp)) {
+		if (preg_match("/(LEFT|CENTER|RIGHT)(:TOP|:MIDDLE|:BOTTOM)?(:([0-9]+[%]?))?/i",$cells[0],$tmp)) {
+//			var_dump($tmp); echo "<br>\n";
 			if (substr($tmp[0],0,1) != ':') {
 				if (array_key_exists (3,$tmp)) {
-					if ($tmp[3]) {
-						if (!strpos($tmp[3],"%")) $tmp[3] .= "px";
-						$this->style['width'] = "width:".$tmp[3].";";
+					if ($tmp[4]) {
+						if (!strpos($tmp[4],"%")) $tmp[4] .= "px";
+						$this->style['width'] = "width:".$tmp[4].";";
 					}
 				}
 				if (array_key_exists (1,$tmp)) {
 					if ($tmp[1]) $this->style['align'] = "text-align:".strtolower($tmp[1]).";";
 				}
 				if (array_key_exists (2,$tmp)) {
-					if ($tmp[2]) $this->style['valign'] = "vertical-align:".strtolower($tmp[2]).";";
+					if ($tmp[2]) $this->style['valign'] = "vertical-align:".substr(strtolower($tmp[2]),1).";";
 				}
-				$cells[0] = preg_replace("/(LEFT|CENTER|RIGHT)?:(TOP|MIDDLE|BOTTOM)?(?::)?([0-9]+[%]?)?/i","",$cells[0]);
+				$cells[0] = preg_replace("/(LEFT|CENTER|RIGHT)(:TOP|:MIDDLE|:BOTTOM)?(:([0-9]+[%]?))?/i","",$cells[0]);
 			}
 		}
 //		echo "CELL2: {$cells[0]}<br>\n";
@@ -796,25 +799,34 @@ class PukiWikiTable extends PukiWikiElement
 		if (preg_match("/AROUND/i",$string)) $this->table_around = "";
 		// ボーダー指定
 		if (preg_match("/B:([0-9]+),?([0-9]*)(one|two|boko|deko|in|out|dash|dott)?/i",$string,$reg)) {
-			if (preg_match("/one/i",$reg[3])) $border_type = "solid";
-			else if (preg_match("/two/i",$reg[3])) $border_type = "double";
-			else if (preg_match("/boko/i",$reg[3])) $border_type = "groove";
-			else if (preg_match("/deko/i",$reg[3])) $border_type = "ridge";
-			else if (preg_match("/in/i",$reg[3])) $border_type = "inset";
-			else if (preg_match("/out/i",$reg[3])) $border_type = "outset";
-			else if (preg_match("/dash/i",$reg[3])) $border_type = "dashed";
-			else if (preg_match("/dott/i",$reg[3])) $border_type = "dotted";
-			else $border_type = "outset";
-			//$this->table_style .= " border=\"".$reg[1]."\"";
-			if ($reg[1]==="0"){
-				$this->table_sheet .= "border:none;";
+			if (array_key_exists (3,$reg)) {
+				if (preg_match("/one/i",$reg[3])) $border_type = "solid";
+				else if (preg_match("/two/i",$reg[3])) $border_type = "double";
+				else if (preg_match("/boko/i",$reg[3])) $border_type = "groove";
+				else if (preg_match("/deko/i",$reg[3])) $border_type = "ridge";
+				else if (preg_match("/in/i",$reg[3])) $border_type = "inset";
+				else if (preg_match("/out/i",$reg[3])) $border_type = "outset";
+				else if (preg_match("/dash/i",$reg[3])) $border_type = "dashed";
+				else if (preg_match("/dott/i",$reg[3])) $border_type = "dotted";
+				else $border_type = "outset";
 			} else {
-				$this->table_sheet .= "border:".$border_type." ".$reg[1]."px;";
+				$border_type = "outset";
 			}
-			if ($reg[2]!=""){
-				$this->table_style .= " cellspacing=\"".$reg[2]."\"";
-			} else {
-				$this->table_style .= " cellspacing=\"1\"";
+			
+			//$this->table_style .= " border=\"".$reg[1]."\"";
+			if (array_key_exists (1,$reg)) {
+				if ($reg[1]==="0"){
+					$this->table_sheet .= "border:none;";
+				} else {
+					$this->table_sheet .= "border:".$border_type." ".$reg[1]."px;";
+				}
+			}
+			if (array_key_exists (2,$reg)) {
+				if ($reg[2]!=""){
+					$this->table_style .= " cellspacing=\"".$reg[2]."\"";
+				} else {
+					$this->table_style .= " cellspacing=\"1\"";
+				}
 			}
 			$string = preg_replace("/B:([0-9]+),?([0-9]*)(one|two|boko|deko|in|out|dash|dott)?/i","",$string);
 		} else {
@@ -859,8 +871,10 @@ class PukiWikiTable extends PukiWikiElement
 			$this->table_around = "";
 		}
 		if (preg_match("/T(LEFT|CENTER|RIGHT)?:([0-9]+[%]?)/i",$string,$reg)) {
-			if (!strpos($reg[2],"%")) $reg[2] .= "px";
-			$this->table_sheet .= "width:".$reg[2].";";
+			if (array_key_exists (2,$reg)) {
+				if (!strpos($reg[2],"%")) $reg[2] .= "px";
+				$this->table_sheet .= "width:".$reg[2].";";
+			}
 		}
 		$string = preg_replace("/^(TLEFT|TCENTER|TRIGHT|T):([0-9]+[%]?)?/i","",$string);
 		return $string;
