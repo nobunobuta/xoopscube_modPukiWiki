@@ -37,17 +37,17 @@ Last-Update:2002-10-29 rev.33
 //   2004/08/10 : PukiWiki添付ファイルは扱えないのでURL参照のみに修正
 
 // GDのバージョンセット(必ず環境に合わせる)
-//if (!defined('_WIKI_GD_VERSION')) define('_WIKI_GD_VERSION',1); // Ver 1
-if (!defined('_WIKI_GD_VERSION')) define('_WIKI_GD_VERSION',2); // Ver 2
+//if (!defined('MOD_PUKI_REF_GD_VERSION')) define('MOD_PUKI_REF_GD_VERSION',1); // Ver 1
+if (!defined('MOD_PUKI_REF_GD_VERSION')) define('MOD_PUKI_REF_GD_VERSION',2); // Ver 2
 
 // file icon image
-if (!defined('REF_FILE_ICON')) define('REF_FILE_ICON','<img src="'.MOD_PUKI_UPLOAD_URL.'file.gif" alt="file" width="20" height="20" />');
+if (!defined('MOD_PUKI_REF_FILE_ICON')) define('REF_FILE_ICON','<img src="'.MOD_PUKI_FILE_ICON'." alt="file" width="20" height="20" />');
 
 // default alignment
-if (!defined('REF_DEFAULT_ALIGN')) define('REF_DEFAULT_ALIGN','left'); // 'left','center','right'
+if (!defined('MOD_PUKI_REF_DEFAULT_ALIGN')) define('REF_DEFAULT_ALIGN','left'); // 'left','center','right'
 
 // force wrap on default
-if (!defined('REF_WRAP_TABLE')) define('REF_WRAP_TABLE',FALSE); // TRUE,FALSE
+if (!defined('MOD_PUKI_REF_WRAP_TABLE')) define('REF_WRAP_TABLE',FALSE); // TRUE,FALSE
 
 function plugin_ref_inline() {
 
@@ -114,9 +114,9 @@ function plugin_ref_convert() {
 	else if ($params['center'])
 		$align = 'center';
 	else
-		$align = REF_DEFAULT_ALIGN;
+		$align = MOD_PUKI_REF_DEFAULT_ALIGN;
 
-	if ((REF_WRAP_TABLE and !$params['nowrap']) or $params['wrap']) {
+	if ((MOD_PUKI_REF_WRAP_TABLE and !$params['nowrap']) or $params['wrap']) {
 		$ret = wrap_table($ret, $align, $params['around']);
 	}
 	$ret = wrap_div($ret, $align, $params['around']);
@@ -199,7 +199,7 @@ function plugin_ref_body($name,$args,$params){
 		$url = $ext = $info = htmlspecialchars($name);
 		$icon = $size = '';
 		$l_url = $url;
-		$icon = REF_FILE_ICON;
+		$icon = MOD_PUKI_REF_FILE_ICON;
 		if (preg_match('/([^\/]+)$/', $name, $match)) { $ext = $match[1]; }
 	} else {
 		$page = '';
@@ -496,7 +496,7 @@ function plugin_ref_make_thumb($url,$s_file_base,$width,$height,$org_w,$org_h) {
 	if (!function_exists("ImageCreate")) return $url;//GDをサポートしていない
 
 	$gifread = '';
-	if (_WIKI_GD_VERSION == 2) {
+	if (MOD_PUKI_REF_GD_VERSION == 2) {
 		$imagecreate = "ImageCreateTrueColor";
 		$imageresize = "ImageCopyResampled";
 	}else {

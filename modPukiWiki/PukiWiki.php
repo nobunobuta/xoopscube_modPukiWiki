@@ -14,7 +14,6 @@ if (!defined('MOD_PUKI_BASE')) {
     define('MOD_PUKI_BASE', dirname(__FILE__));
 	define('MOD_PUKI_PLUGIN_DIR', MOD_PUKI_BASE . '/plugin/');
 	define('MOD_PUKI_CONFIG_DIR',  MOD_PUKI_BASE . '/config/');
-	define('MOD_PUKI_CACHE_DIR',  MOD_PUKI_BASE . '/cache/');
 	define('MOD_PUKI_IMAGE_DIR',  MOD_PUKI_BASE . '/images/');
 	define('MOD_PUKI_DATA_DIR',  MOD_PUKI_BASE . '/wiki/');
 	define('MOD_PUKI_DEFAULT', MOD_PUKI_CONFIG_DIR .'default.php');
@@ -39,6 +38,12 @@ if (defined('XOOPS_ROOT_PATH')) {
 		if (!defined('MOD_PUKI_WIKI_UPLOAD_DIR')) define('MOD_PUKI_WIKI_UPLOAD_DIR', XOOPS_ROOT_PATH.'/modules/pukiwiki/attach/');
 		if (!defined('MOD_PUKI_WIKI_VER')) define('MOD_PUKI_WIKI_VER','1.3');
 	}
+	//キャッシュのファイルの保管先 
+	// XOOPS環境下では、cacheディレクトリ下にmodPukiWikiというディレクトリを作成して自動設定
+	if (!defined('MOD_PUKI_CACHE_DIR')) {
+		define('MOD_PUKI_CACHE_DIR',XOOPS_ROOT_PATH.'/cache/modPukiWiki/');
+		if (!file_exists(MOD_PUKI_CACHE_DIR)) mkdir(MOD_PUKI_CACHE_DIR, 0777);
+	}
 	//画像キャッシュなどのファイルの保管先 
 	// XOOPS環境下では、uploadsディレクトリ下にmodPukiWikiというディレクトリを作成して自動設定
 	if (!defined('MOD_PUKI_UPLOAD_URL')) define('MOD_PUKI_UPLOAD_URL', XOOPS_URL.'/uploads/modPukiWiki/');
@@ -48,6 +53,12 @@ if (defined('XOOPS_ROOT_PATH')) {
 	}
 //For WordPress Environment
 } else if (defined('ABSPATH') and ('WPINC')) {
+	//キャッシュのファイルの保管先 
+	// XOOPS環境下では、wp-contentディレクトリ下にmodPukiWikiというディレクトリを作成して自動設定
+	if (!defined('MOD_PUKI_CACHE_DIR')) {
+		define('MOD_PUKI_CACHE_DIR',ABSPATH.'/wp-content/modPukiWiki/');
+		if (!file_exists(MOD_PUKI_CACHE_DIR)) mkdir(MOD_PUKI_CACHE_DIR, 0777);
+	}
 	//画像キャッシュなどのファイルの保管先 
 	// WordPress環境下では、Fileアップロード関連の設定を参照して自動設定
 	if (file_exists(get_settings('fileupload_realpath'))) {
@@ -57,6 +68,10 @@ if (defined('XOOPS_ROOT_PATH')) {
 			if (!file_exists(MOD_PUKI_UPLOAD_DIR)) mkdir(MOD_PUKI_UPLOAD_DIR, 0777);
 		}
 	}
+} else {
+	//キャッシュのファイルの保管先 
+	// 汎用環境下では、modPukiWikiのcacheディレクトリをそのまま利用
+	define('MOD_PUKI_CACHE_DIR', MOD_PUKI_BASE . '/cache/');
 }
 
 //Plugin等で使用する画像ファイルを、画像キャッシュディレクトリに保存する。
@@ -69,6 +84,7 @@ if(defined('MOD_PUKI_UPLOAD_DIR')) {
 		if (!file_exists(MOD_PUKI_UPLOAD_DIR.$modPukiIMG)) copy (MOD_PUKI_IMAGE_DIR.$modPukiIMG, MOD_PUKI_UPLOAD_DIR.$modPukiIMG);
 	}
 	if (!defined('MOD_PUKI_NOIMAGE')) define('MOD_PUKI_NOIMAGE',MOD_PUKI_UPLOAD_URL.'/noimage.png');
+	if (!defined('MOD_PUKI_FILE_ICON')) define('MOD_PUKI_FILE_ICON',MOD_PUKI_UPLOAD_URL.'/file.gif');
 }
 
 //modPukiWikiの各クラスをロード

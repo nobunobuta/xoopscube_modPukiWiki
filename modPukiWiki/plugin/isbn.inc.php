@@ -11,22 +11,22 @@
 
 /////////////////////////////////////////////////
 // AmazonアソシエイトID
-if (!defined('AMAZON_ASE_ID')) define('AMAZON_ASE_ID','nobunobuxoops-22');
+if (!defined('MOD_PUKI_ISBN_AMAZON_ASE_ID')) define('MOD_PUKI_ISBN_AMAZON_ASE_ID','nobunobuxoops-22');
 // amazon 商品情報問合せ URI(dev-t はマニュアルのディフォルト値)
-if (!defined('ISBN_AMAZON_XML'))
-	define('ISBN_AMAZON_XML','http://xml.amazon.co.jp/onca/xml3?t=webservices-20&dev-t=GTYDRES564THU&type=lite&page=1&f=xml&locale=jp&AsinSearch=');
+if (!defined('MOD_PUKI_ISBN_AMAZON_XML'))
+	define('MOD_PUKI_ISBN_AMAZON_XML','http://xml.amazon.co.jp/onca/xml3?t=webservices-20&dev-t=GTYDRES564THU&type=lite&page=1&f=xml&locale=jp&AsinSearch=');
 // amazon shop URI (_ISBN_ に商品IDがセットされる)
-if (!defined('ISBN_AMAZON_SHOP'))
-	define('ISBN_AMAZON_SHOP','http://www.amazon.co.jp/exec/obidos/ASIN/_ISBN_/ref=nosim/'.AMAZON_ASE_ID);
+if (!defined('MOD_PUKI_ISBN_AMAZON_SHOP'))
+	define('MOD_PUKI_ISBN_AMAZON_SHOP','http://www.amazon.co.jp/exec/obidos/ASIN/_ISBN_/ref=nosim/'.MOD_PUKI_ISBN_AMAZON_ASE_ID);
 // amazon UsedShop URI (_ISBN_ に商品IDがセットされる)
-if (!defined('ISBN_AMAZON_USED'))
-	define('ISBN_AMAZON_USED','http://www.amazon.co.jp/exec/obidos/tg/detail/offer-listing/-/_ISBN_/all/ref='.AMAZON_ASE_ID);
+if (!defined('MOD_PUKI_ISBN_AMAZON_USED'))
+	define('MOD_PUKI_ISBN_AMAZON_USED','http://www.amazon.co.jp/exec/obidos/tg/detail/offer-listing/-/_ISBN_/all/ref='.MOD_PUKI_ISBN_AMAZON_ASE_ID);
 
 /////////////////////////////////////////////////
 // expire 画像キャッシュを何日で削除するか
-if (!defined('ISBN_AMAZON_EXPIRE_IMG')) define('ISBN_AMAZON_EXPIRE_IMG',10);
+if (!defined('MOD_PUKI_ISBN_AMAZON_EXPIRE_IMG')) define('MOD_PUKI_ISBN_AMAZON_EXPIRE_IMG',10);
 // expire タイトルキャッシュを何日で削除するか
-if (!defined('ISBN_AMAZON_EXPIRE_TIT')) define('ISBN_AMAZON_EXPIRE_TIT',1);
+if (!defined('MOD_PUKI_ISBN_AMAZON_EXPIRE_TIT')) define('MOD_PUKI_ISBN_AMAZON_EXPIRE_TIT',1);
 
 
 function plugin_isbn_convert() {
@@ -106,7 +106,7 @@ function plugin_isbn_inline() {
 	$title = "$tmpary[0]";
 	$text = htmlspecialchars($option);
 	$alt = plugin_isbn_get_caption($tmpary);
-	$amazon_a = '<a href="'.str_replace('_ISBN_',$isbn,ISBN_AMAZON_SHOP).'" target="_blank" title="'.$alt.'">';
+	$amazon_a = '<a href="'.str_replace('_ISBN_',$isbn,MOD_PUKI_ISBN_AMAZON_SHOP).'" target="_blank" title="'.$alt.'">';
 	if ($option != 'img'){
 		if ($option) $title = $text;
 		return $amazon_a . $title . '</a>';
@@ -145,9 +145,9 @@ function plugin_isbn_get_caption($data)
 function plugin_isbn_get_info($data,$isbn)
 {
 	$alt = plugin_isbn_get_caption($data);
-	$amazon_a = '<a href="'.str_replace('_ISBN_',$isbn,ISBN_AMAZON_SHOP).'" target="_blank" title="'.$alt.'">';
+	$amazon_a = '<a href="'.str_replace('_ISBN_',$isbn,MOD_PUKI_ISBN_AMAZON_SHOP).'" target="_blank" title="'.$alt.'">';
 	$amazon_s1 = "<a href=\"http://www.amazon.co.jp/exec/obidos/external-search/?mode=blended&amp;keyword=";
-	$amazon_s2 = "&amp;tag=".AMAZON_ASE_ID."&amp;encoding-string-jp=%93%FA%96%7B%8C%EA&amp;Go.x=14&amp;Go.y=5\" target=\"_blank\" alt=\"Amazon Serach\" title=\"Amazon Serach\">";
+	$amazon_s2 = "&amp;tag=".MOD_PUKI_ISBN_AMAZON_ASE_ID."&amp;encoding-string-jp=%93%FA%96%7B%8C%EA&amp;Go.x=14&amp;Go.y=5\" target=\"_blank\" alt=\"Amazon Serach\" title=\"Amazon Serach\">";
 	if ($data[3])
 	{
 		$artists = array();
@@ -178,7 +178,7 @@ function plugin_isbn_get_info($data,$isbn)
 		$off = " ({$off}% Off)";
 	}
 	if ($data[9])
-		$data[9] = '<a href="'.str_replace('_ISBN_',$isbn,ISBN_AMAZON_USED).'" target="_blank" alt="Amazon Used Serach" title="Amazon Used Serach">'.$data[9].'円〜</a>';
+		$data[9] = '<a href="'.str_replace('_ISBN_',$isbn,MOD_PUKI_ISBN_AMAZON_USED).'" target="_blank" alt="Amazon Used Serach" title="Amazon Used Serach">'.$data[9].'円〜</a>';
 
 	$td_title_style = " style=\"text-align:right;\" nowrap=\"true\"";
 	$ret = "<div><table style=\"width:auto;\">";
@@ -198,7 +198,7 @@ function plugin_isbn_get_info($data,$isbn)
 
 function plugin_isbn_print_isbn_img($isbn, $align, $alt, $title, $h_title, $price, $header="",$listprice,$usedprice)
 {
-	$amazon_a = '<a href="'.str_replace('_ISBN_',$isbn,ISBN_AMAZON_SHOP).'" target="_blank" title="'.$alt.'">';
+	$amazon_a = '<a href="'.str_replace('_ISBN_',$isbn,MOD_PUKI_ISBN_AMAZON_SHOP).'" target="_blank" title="'.$alt.'">';
 	if ($align == 'clear') {			// 改行挿入
 		return '<div style="clear:both"></div>';
 	}
@@ -244,7 +244,7 @@ EOD;
 function plugin_isbn_get_isbn_title($isbn,$check=true) {
 	$nocache = $nocachable = 0;
 	$title = '';
-	$url = ISBN_AMAZON_XML.$isbn;
+	$url = MOD_PUKI_ISBN_AMAZON_XML.$isbn;
 	if (file_exists(MOD_PUKI_UPLOAD_DIR) === false or is_writable(MOD_PUKI_UPLOAD_DIR) === false) {
 		$nocachable = 1;							// キャッシュ不可の場合
 	}
@@ -289,7 +289,7 @@ function plugin_isbn_cache_fetch($target, $dir, $check=true) {
 	
 	if (!is_readable($filename))
 		return "";
-	elseif($check && ISBN_AMAZON_EXPIRE_TIT * 3600 * 24 < time() - filemtime($filename))
+	elseif($check && MOD_PUKI_ISBN_AMAZON_EXPIRE_TIT * 3600 * 24 < time() - filemtime($filename))
 		return "";
 
 	if (!($fp = @fopen($filename, "r"))) return "";
@@ -305,7 +305,7 @@ function plugin_isbn_cache_fetch($target, $dir, $check=true) {
 function plugin_isbn_cache_image_fetch($target, $dir, $check=true) {
 	$filename = MOD_PUKI_UPLOAD_DIR.PukiWikiFunc::encode("ISBN".$target.".jpg");
 
-	if (!is_readable($filename) || (is_readable($filename) && $check && ISBN_AMAZON_EXPIRE_IMG * 3600 * 24 < time() - filemtime($filename))) {
+	if (!is_readable($filename) || (is_readable($filename) && $check && MOD_PUKI_ISBN_AMAZON_EXPIRE_IMG * 3600 * 24 < time() - filemtime($filename))) {
 		$url = "http://images-jp.amazon.com/images/P/" . strtoupper($target) . ".09.MZZZZZZZ.jpg";
 		if (!PukiWikiFunc::is_url($url)) return false; // URL 形式チェック
 		$size = @getimagesize($url);
