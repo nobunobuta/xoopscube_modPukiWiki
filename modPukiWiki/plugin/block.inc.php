@@ -57,7 +57,7 @@ function plugin_block_convert()
 	return "<div{$style} class=\"wiki_body_block\">";
 }
 
-//ƒIƒvƒVƒ‡ƒ“‚ğ‰ğÍ‚·‚é
+//¥ª¥×¥·¥ç¥ó¤ò²òÀÏ¤¹¤ë
 function block_check_arg($val, $key, &$params)
 {
 	if ($val == '') { $params['_done'] = TRUE; return; }
@@ -65,7 +65,7 @@ function block_check_arg($val, $key, &$params)
 	if (!$params['_done']) {
 		foreach (array_keys($params) as $key)
 		{
-			if (strpos($val,':')) // PHP4.3.4{Apache2 ŠÂ‹«‚Å‰½ŒÌ‚©Apache‚ª—‚¿‚é‚Æ‚Ì•ñ‚ª‚ ‚Á‚½‚Ì‚Å
+			if (strpos($val,':')) // PHP4.3.4¡ÜApache2 ´Ä¶­¤Ç²¿¸Î¤«Apache¤¬Íî¤Á¤ë¤È¤ÎÊó¹ğ¤¬¤¢¤Ã¤¿¤Î¤Ç
 				list($_val,$thisval) = explode(":",$val);
 			else
 			{

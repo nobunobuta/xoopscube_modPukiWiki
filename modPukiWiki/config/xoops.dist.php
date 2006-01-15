@@ -1,25 +1,51 @@
 <?php
-//XOOPS屌桳偺愝掕(埲壓偺俀偮偼曄偊側偄帠傪悇彠
+//******************* ご庙罢 *******************
+// このファイルを木儡试礁暮いても紊いですが、
+// バ〖ジョンアップ箕に惧今きされるのを松ぐために
+// このファイル(xoops.dist.php)をxoops.phpに
+// コピ〖してから、カストマイズする祸をおすすめします。
+//******************* ご庙罢 *******************
+
 /////////////////////////////////////////////////
-// 夵峴傪斀塮偡傞(夵峴傪<br />偵抲姺偡傞)
-	PukiWikiConfig::setParam('line_break',1);
+//XOOPS盖铜の肋年(笆布は恃えない祸を夸京)
 /////////////////////////////////////////////////
-// URL偺帺摦儕儞僋惗惉偼modPukiWiki懁偱偼峴傢側偄
+// URLの极瓢リンク栏喇はmodPukiWiki娄では乖わない
 	PukiWikiConfig::setParam('autourllink',0);
-//
-//僇僗僩儅僀僘壜擻側戙昞揑側愝掕椺
 /////////////////////////////////////////////////
-// AutoLink傪桳岠偵偡傞応崌偼丄AutoLink懳徾偲側傞
-// 儁乕僕柤偺嵟抁僶僀僩悢傪巜掕
-// AutoLink傪柍岠偵偡傞応崌偼0
+
+/////////////////////////////////////////////////
+//カストマイズ材墙な洛山弄な肋年毋
+/////////////////////////////////////////////////
+// AutoLinkを铜跟にする眷圭は、AutoLink滦据となる
+// ペ〖ジ叹の呵没バイト眶を回年
+// AutoLinkを痰跟にする眷圭は0
+//  (PukiWikiMod第びB-Wiki漓脱)
 //	PukiWikiConfig::setParam('autolink',3);
 /////////////////////////////////////////////////
-// 奼挘僥乕僽儖彂幃傪巊梡偡傞
+// PukiWikiModへのリンクを琅弄URL妨及にする
+//  (PukiWikiMod漓脱)
+//	PukiWikiConfig::setParam('use_static_url',1);
+/////////////////////////////////////////////////
+// 橙磨テ〖ブル今及を蝗脱する
+// PukiWikiModの橙磨テ〖ブル今及を蝗脱材墙にします。
+// デフォルトでは、PukiWiki1.4.xのテ〖ブル今及のみが
+// 蝗脱材墙です。
 //	PukiWikiConfig::setParam('ExtTable',true);
 /////////////////////////////////////////////////
-// 儗儞僟儕儞僌僉儍僢僔儏傪桳岠偵偡傞
+// レンダリングキャッシュを铜跟にする
 //	PukiWikiConfig::setParam('use_cache',1);
 /////////////////////////////////////////////////
-// PukiWikiMod傊偺儕儞僋傪惷揑URL宍幃偵偡傞
-	PukiWikiConfig::setParam('use_static_url',1);
+// 办戎嘲娄の<p></p>を叫蜗しない
+	PukiWikiConfig::setParam('omit_paragraph',1);
+
+/////////////////////////////////////////////////
+// その戮カスタマイズ材墙なパラメ〖タは、default.phpを
+// 徊救して布さい。
+// 芒し、default.phpでの今及が般うので庙罢して布さい。
+// default.phpにて、
+//		$_settings['nowikiname'] = 1;
+// とある眷圭には、碰ファイルでは
+//		PukiWikiConfig::setParam('nowikiname',1);
+// というように肋年して布さい。
+/////////////////////////////////////////////////
 ?>

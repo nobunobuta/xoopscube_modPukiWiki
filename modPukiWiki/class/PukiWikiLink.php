@@ -36,7 +36,7 @@ class PukiWikiInlineConverter
 		}
 		$this->converters = $converters;
 	}
-    function PukiWikiInlineConverter($converters=NULL,$excludes=NULL)
+	function PukiWikiInlineConverter($converters=NULL,$excludes=NULL)
 	{
 		if ($converters === NULL)
 		{
@@ -47,10 +47,10 @@ class PukiWikiInlineConverter
 				'url_interwiki', // URL (interwiki definition)
 				'mailto',        // mailto:
 				'interwikiname', // InterWikiName
-				'autolink',      // AutoLink
+//				'autolink',      // AutoLink
 				'bracketname',   // BracketName
 				'wikiname',      // WikiName
-				'autolink_a',    // AutoLink(アルファベット)
+//				'autolink_a',    // AutoLink(アルファベット)
 			);
 		}
 		if ($excludes !== NULL)
@@ -90,6 +90,10 @@ class PukiWikiInlineConverter
 		{
 			$retval .= array_shift($arr).array_shift($this->result);
 		}
+ 		// オートリンク by nao-pon
+ 		// InlineConverter による一括処理では、
+ 		// ページ数増加(正規表現32kb以上)時に正常に処理できない。
+ 		$retval = $this->auto_link($retval);
 		return $retval;
 	}
 	function replace($arr)
@@ -131,6 +135,66 @@ class PukiWikiInlineConverter
 		}
 		return NULL;
 	}
+	// 別処理でのオートリンク by nao-pon
+	function auto_link(&$str)
+	{
+		$autolink = PukiWikiConfig::getParam('autolink');
+		
+		if (!$autolink) return $str;
+		
+		static $auto;
+		static $auto_a;
+		static $forceignorepages;
+		
+		if (!$auto && !$auto_a)
+		{
+			@list($auto,$auto_a,$forceignorepages) = PukiWikiConfig::getParam('autolink_dat');
+			$auto = trim($auto);
+			$auto_a = trim($auto_a);
+			$forceignorepages = explode("\t",trim($forceignorepages));
+		}
+		
+		$this->forceignorepages = $forceignorepages;
+		
+		// ページ数が多い場合は、セパレータ \t で複数パターンに分割されている
+		foreach(explode("\t",$auto) as $pat)
+		{
+			$pattern = "/(<(?:a|A).*?<\/(?:a|A)>|<[^>]*>|&(?:#[0-9]+|#x[0-9a-f]+|[0-9a-zA-Z]+);)|($pat)/s";
+			$str = preg_replace_callback($pattern,array(&$this,'auto_link_replace'),$str);
+		}
+		
+		return $str;
+	}
+	function auto_link_replace($match)
+	{
+		static $pagename_aliases = null;
+		if (is_null($pagename_aliases))
+		{
+			$pagename_aliases = PukiWikiConfig::getParam('pagename_aliases');
+		}
+		
+		if (!empty($match[1])) return $match[1];
+		$alias = $name = $match[2];
+		
+		// 無視リストに含まれているページを捨てる
+		if (in_array($name,$this->forceignorepages)) {return $match[0];}
+		
+		// ページが存在しない場合
+		if (!PukiWikiFunc::is_page($name))
+		{
+			// ページ名エイリアスを探す
+			if (array_key_exists($name,$pagename_aliases))
+			{
+				$name = $pagename_aliases[$name];
+			}
+			else
+			{
+				// 共通リンクディレクトリを探す
+				if (!$name = PukiWikiFunc::get_real_pagename($name)) return $match[0];
+			}
+		}
+		return PukiWikiLink::make_pagelink($name,$alias,'',$name);
+  	}
 }
 //インライン要素集合のベースクラス
 class PukiWikiLink
@@ -176,7 +240,7 @@ class PukiWikiLink
 		return $arr;
 	}
 	// 基本パラメータを設定する
-	function setParam($page,$name,$body,$type='',$alias='')
+	function setParam($page,$name,$body,$type='',$alias='', $tip='')
 	{
 		static $converter = NULL;
 		
@@ -199,11 +263,11 @@ class PukiWikiLink
 			$alias = preg_replace('#</?a[^>]*>#i','',$alias);  //BugTrack 669
 		}
 		$this->alias = $alias;
-		
+		$this->tip = $tip;
 		return TRUE;
 	}
 	// ページ名のリンクを作成
-	function make_pagelink($page, $alias='',$anchor='',$refer='')
+	function make_pagelink($page, $alias='',$anchor='',$refer='',$tip='')
 	{
 		$s_page = htmlspecialchars(PukiWikiFunc::strip_bracket($page));
 		$s_alias = ($alias == '') ? $s_page : $alias;
@@ -225,8 +289,12 @@ class PukiWikiLink
 		}
 		if (defined('MOD_PUKI_WIKI_URL')) {
 			if (PukiWikiFunc::is_page($page)) {
-				$passage = "";
-				$title = PukiWikiConfig::getParam('link_compact') ? '' : " title=\"$s_page$passage\"";
+				if ($tip) {
+					$title = " title=\"".$tip."\"";
+				} else {
+					$passage = "";
+					$title = PukiWikiConfig::getParam('link_compact') ? '' : " title=\"$s_page$passage\"";
+				}
 				if (defined('XOOPS_URL') and MOD_PUKI_WIKI_VER=='1.3' and PukiWikiConfig::getParam('use_static_url')) {
 					return "<a href=\"".XOOPS_URL.'/modules/pukiwiki/'.PukiWikiFunc::get_pgid_by_name($page).".html{$anchor}\"$title>$s_alias</a>";
 				} else {
@@ -484,7 +552,8 @@ EOD;
 	function set($arr,$page)
 	{
 		$WikiName = PukiWikiConfig::getParam('WikiName');
-
+		$pagename_aliases = PukiWikiConfig::getParam('pagename_aliases');
+		
 		list(,$alias,,$name,$this->anchor) = $this->splice($arr);
 		if ($name == '' and $this->anchor == '')
 		{
@@ -492,6 +561,21 @@ EOD;
 		}
 		if ($name != '' and preg_match("/^$WikiName$/",$name))
 		{
+			// ページが存在しない場合
+			if (!PukiWikiFunc::is_page($name))
+			{
+				// ページ名エイリアスを探す
+				if (array_key_exists($name,$pagename_aliases))
+				{
+					$name = $pagename_aliases[$name];
+				}
+				else
+				{
+					// 共通リンクディレクトリを探す
+					$_name = PukiWikiFunc::get_real_pagename($name);
+					if ($_name) $name = $_name;
+				}
+			}
 			return parent::setParam($page,$name,'','pagename',$alias);
 		}
 		if ($alias == '')
@@ -509,7 +593,17 @@ EOD;
 		{
 			if (!(PukiWikiFunc::is_pagename($name)))
 			{
-				return FALSE;
+				// ページ名エイリアスを探す
+				if (array_key_exists($name,$pagename_aliases))
+				{
+					$name = $pagename_aliases[$name];
+				}
+				else
+				{
+					// 共通リンクディレクトリを探す
+					$_name = PukiWikiFunc::get_real_pagename($name);
+					if ($_name) $name = $_name;
+				}
 			}
 		}
 		return parent::setParam($page,$name,'','pagename',$alias);
@@ -544,8 +638,26 @@ class PukiWikiLink_wikiname extends PukiWikiLink
 	}
 	function set($arr,$page)
 	{
+		$pagename_aliases = PukiWikiConfig::getParam('pagename_aliases');
 		list($name) = $this->splice($arr);
-		return parent::setParam($page,$name,'','pagename',$name);
+		$alias = $name;
+		
+		// ページが存在しない場合
+		if (!is_page($name))
+		{
+			// ページ名エイリアスを探す
+			if (array_key_exists($name,$pagename_aliases))
+			{
+				$name = $pagename_aliases[$name];
+			}
+			else
+			{
+				// 共通リンクディレクトリを探す
+				$_name = PukiWikiFunc::get_real_pagename($name);
+				if ($_name) $name = $_name;
+			}
+		}
+		return parent::setParam($page,$name,'','pagename',$alias);
 	}
 	function toString()
 	{
@@ -634,13 +746,14 @@ class PukiWikiLink_autolink extends PukiWikiLink
 	}
 	function set($arr,$page)
 	{
+		$pagename_aliases = PukiWikiConfig::getParam('pagename_aliases');
 		$WikiName = PukiWikiConfig::getParam('WikiName');
 		
 		list($name) = $this->splice($arr);
 		
 		// 共通リンクディレクトリ対応 by nao-pon
 		$alias = $name;
-		
+		$tip = '';
 		// 無視リストに含まれている、あるいは存在しないページを捨てる
 		// 共通リンクディレクトリ対応 by nao-pon
 		//if (in_array($name,$this->forceignorepages) or PukiWikiFunc::is_page($name))
@@ -652,13 +765,24 @@ class PukiWikiLink_autolink extends PukiWikiLink
 		// 共通リンクディレクトリを探す by nao-pon
 		if (!PukiWikiFunc::is_page($name))
 		{
-			if (!$name = PukiWikiFunc::get_real_pagename($name))
-				return FALSE;
+			// ページ名エイリアスを探す
+			if (array_key_exists($name,$pagename_aliases))
+			{
+				$name = explode('!', $pagename_aliases[$name]);
+				if (count($name) == 2) $tip = $name[1];
+				$name = $name[0];
+			}
+			else
+			{
+				// 共通リンクディレクトリを探す
+				if (!$name = PukiWikiFunc::get_real_pagename($name))
+					return FALSE;
+			}
 		}
 		
 		// 共通リンクディレクトリ対応 by nao-pon
 		//return parent::setParam($page,$name,'','pagename',$name);
-		return parent::setParam($page,$name,'','pagename',$alias);
+		return parent::setParam($page,$name,'','pagename',$alias, $tip);
 	}
 	function toString()
 	{
@@ -666,7 +790,8 @@ class PukiWikiLink_autolink extends PukiWikiLink
 			$this->name,
 			$this->alias,
 			'',
-			$this->page
+			$this->page,
+			$this->tip
 		);
 	}
 }

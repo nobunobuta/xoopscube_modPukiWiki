@@ -20,6 +20,10 @@ function plugin_ruby_inline()
 	}
 
 	$s_ruby = htmlspecialchars($ruby);
-	return "<ruby><rb>$body</rb><rp>(</rp><rt>$s_ruby</rt><rp>)</rp></ruby>";
+	if (preg_match('/MSIE/', $_SERVER['HTTP_USER_AGENT'])) {
+		return "<ruby><rb>$body</rb><rp>(</rp><rt>$s_ruby</rt><rp>)</rp></ruby>";
+	} else {
+		return "$body($s_ruby)";
+	}
 }
 ?>

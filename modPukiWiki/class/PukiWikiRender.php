@@ -190,9 +190,13 @@ class PukiWikiRender {
 	}
 	
 	function _fix_table_br($string) {
-		$string = str_replace("~___td_br___","<br>",$string);
+		$string = str_replace("~___td_br___","<br />",$string);
 		$string = str_replace("___td_br___","",$string);
-		$string = preg_replace("/^<p>([^<>\n]*)<\/p>$/sD","$1",$string);
+		if (PukiWikiConfig::getParam("omit_paragraph")) {
+			$string = preg_replace("/^<p>(.*)<\/p>$/sD","$1",$string);
+		} else {
+		    $string = preg_replace("/^<p>([^<>\n]*)<\/p>$/sD","$1",$string);
+		}
 		return $string;
 	}
 
@@ -216,7 +220,8 @@ class PukiWikiRender {
 		// AutoLinkデータ読み込みとチェック(AutoLink有効時のみ)
 		$autolink_dat = array();
 		if ((PukiWikiConfig::getParam('autolink')) && (defined('MOD_PUKI_WIKI_CACHE_DIR')) && (file_exists(MOD_PUKI_WIKI_CACHE_DIR.'autolink.dat'))) {
-			$autolink_dat = file(MOD_PUKI_WIKI_CACHE_DIR.'autolink.dat');
+//			$autolink_dat = file(MOD_PUKI_WIKI_CACHE_DIR.'autolink.dat');
+			$autolink_dat = file(MOD_PUKI_WIKI_CACHE_DIR.((file_exists(MOD_PUKI_WIKI_CACHE_DIR.'autolink2.dat'))? 'autolink2.dat' : 'autolink.dat'));
 			if (!file_exists(MOD_PUKI_CACHE_DIR .'autolink.dat') || ($autolink_dat != file(MOD_PUKI_CACHE_DIR .'autolink.dat'))) {
 				// 比較用オートリンクデータを保存
 				@list($pattern, $pattern_a, $forceignorelist) = $autolink_dat;
@@ -248,6 +253,9 @@ class PukiWikiRender {
 			}
 		}
 		PukiWikiConfig::setParam('autolink_dat',$autolink_dat);
+		// ページ名エイリアス取得
+		PukiWikiConfig::setParam('pagename_aliases', PukiWikiFunc::get_pagename_aliases());
+
 	}
 }
 ?>

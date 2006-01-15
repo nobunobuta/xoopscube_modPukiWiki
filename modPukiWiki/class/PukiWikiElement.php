@@ -780,8 +780,8 @@ class PukiWikiTable extends PukiWikiElement
 	function get_table_style($string) {
 //		echo "TABLE: $string <br>\n";
 		$colors_reg = "aqua|navy|black|olive|blue|purple|fuchsia|red|gray|silver|green|teal|lime|white|maroon|yellow|transparent";
-		//$this->table_around = "<br clear=all /><br />";
-		$this->table_around = "<br clear=all />";
+		//$this->table_around = "<br clear=\"all\" /><br />";
+		$this->table_around = "<br clear=\"all\" />";
 		// 回り込み指定
 		if (preg_match("/AROUND/i",$string)) $this->table_around = "";
 		// ボーダー指定

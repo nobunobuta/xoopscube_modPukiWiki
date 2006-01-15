@@ -134,13 +134,26 @@ function is_picture($text) {
 		$parse = parse_url($text);
 		$name = $parse['host']."_".basename($parse['path']);
 		$filename = MOD_PUKI_UPLOAD_DIR.PukiWikiFunc::encode($name);
-		if (is_readable($filename))
+		if (is_readable($filename)) {
 			$text = $filename;
+		} else {
+			$result = PukiWikiFunc::http_request($text);
+			if ($result['rc'] !== 200) {
+				return '';
+			}
+			$orgimg = tempnam(MOD_PUKI_UPLOAD_DIR, 'mpw_work');
+			$fp=fopen($orgimg,'w');
+			fwrite($fp, $result['data']);
+			fclose($fp);
+			$text = $orgimg;
+		}
 	}
 
 	$size = @getimagesize($text);
+	if (!empty($orgimg)) unlink($orgimg);
+
 	if ($size[2] > 0 && $size[2] < 4) {
-		return true;
+		return $size;
 	} else {
 		return false;
 	}
@@ -240,7 +253,7 @@ function plugin_ref_body($name,$args,$params){
 
 		if ($is_picture) {
 			$url = $file;
-			$size = getimagesize($file);
+			$size = $is_picture;
 			$org_w = $size[0];
 			$org_h = $size[1];
 		} else {
@@ -271,7 +284,7 @@ function plugin_ref_body($name,$args,$params){
 				$l_url = $url;
 			} else {
 				//キャッシュしない
-				$size = @getimagesize($url);
+				$size = $is_picture;
 				$l_url = $url;
 				$fsize = '?KB';
 			}
@@ -442,38 +455,16 @@ _HTML_;
 function plugin_ref_cache_image_fetch($id, &$url) {
 	$filename = MOD_PUKI_UPLOAD_DIR.$id;
 	if (!is_readable($filename)) {
-		$file = fopen($url, "rb"); // たぶん size 取得よりこちらが原始的だからやや速い
-		if (! $file) {
-			fclose($file);
+		$result = PukiWikiFunc::http_request($url);
+		if ($result['rc'] !== 200) {
 			$url = MOD_PUKI_NOIMAGE;
-			$size = @getimagesize($url);
+			$result = PukiWikiFunc::http_request($url);
+			$data = $result['data'];
 		} else {
-			// リモートファイルのパケット有効後対策
-			// http://search.net-newbie.com/php/function.fread.html
-			//$data = fread($file, 2000000); 
-			$contents = "";
-			do {
-				$data = fread($file, 8192);
-				if (strlen($data) == 0) {
-					break;
-				}
-				$contents .= $data;
-			} while(true);
-			
-			fclose ($file);
-			
-			$data = $contents;
-			unset ($contents);
-			
-			$size = @getimagesize($url); // あったら、size を取得、通常は1が返るが念のため0の場合も(reimy)
-			if ($size[0] <= 1){
-				$url = MOD_PUKI_NOIMAGE;
-				$size = @getimagesize($url);
-			}else{
-				$url = MOD_PUKI_UPLOAD_URL.$id;
-			}
+			$data = $result['data'];
 		}
 		plugin_ref_cache_image_save($data, $filename);
+		$size = @getimagesize($filename);
 	} else {
 		$url = MOD_PUKI_UPLOAD_URL.$id;
 		$size = @getimagesize($filename);
@@ -507,6 +498,17 @@ function plugin_ref_make_thumb($url,$s_file_base,$width,$height,$org_w,$org_h) {
 		$gifread = "on";
 	}
 
+	if (PukiWikiFunc::is_url($url)) { //URL
+		$result = PukiWikiFunc::http_request($url);
+		if ($result['rc'] !== 200) {
+			return '';
+		}
+		$orgimg = tempnam(MOD_PUKI_UPLOAD_DIR, 'mpw_thumb');
+		$fp=fopen($orgimg,'w');
+		fwrite($fp, $result['data']);
+		fclose($fp);
+		$url = $orgimg;
+	}
 	$size = @GetImageSize($url);
 
 	$dst_im = $imagecreate($width,$height);
@@ -515,6 +517,7 @@ function plugin_ref_make_thumb($url,$s_file_base,$width,$height,$org_w,$org_h) {
 			if ($gifread == "on"){
 				$src_im = ImageCreateFromGif($url);
 				$imageresize ($dst_im,$src_im,0,0,0,0,$width,$height,$size[0],$size[1]);
+				touch($s_file);
 				ImageJpeg($dst_im,$s_file);
 				$url = MOD_PUKI_UPLOAD_URL.$s_file_base;;
 			}
@@ -522,17 +525,22 @@ function plugin_ref_make_thumb($url,$s_file_base,$width,$height,$org_w,$org_h) {
 		case "2": //jpg形式
 			$src_im = ImageCreateFromJpeg($url);
 			$imageresize ($dst_im,$src_im,0,0,0,0,$width,$height,$size[0],$size[1]);
+			touch($s_file);
 			ImageJpeg($dst_im,$s_file);
 			$url = MOD_PUKI_UPLOAD_URL.$s_file_base;;
 			break;
 		case "3": //png形式
 			$src_im = ImageCreateFromPng($url);
 			$imageresize ($dst_im,$src_im,0,0,0,0,$width,$height,$size[0],$size[1]);
+			touch($s_file);
 			ImageJpeg($dst_im,$s_file);
 			$url = MOD_PUKI_UPLOAD_URL.$s_file_base;;
 			break;
 		default:
 			break;
+	}
+	if (!empty($orgimg)) {
+		unlink($orgimg);
 	}
 	return $url;
 }

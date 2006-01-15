@@ -15,18 +15,20 @@ function plugin_tenki_inline()
 	$args = func_get_args();
 	//echo $args[0].":".$args[1];
 	if ($args[0] == "pic") {
-		$url = "http://weather.is.kochi-u.ac.jp/FE/00Latest.jpg";
+//		$url = "http://weather.is.kochi-u.ac.jp/FE/00Latest.jpg";
+		$url = "http://www.jwa.or.jp/sat/images/sat-japan.jpg";
 		$alt = "日本付近赤外画像";
 		$picid = "pic";
 		$args[0] = $args[1];
 		$size[0] = 640;
 		$size[1] = 480;
 	} else {
-		$url = "http://www.jma.go.jp/JMA_HP/jp/g3/latest/SPAS-GG.gif";
+		$url = "http://www.jma.go.jp/jp/g3/images/observe/";
 		$alt = "気象庁発表天気図";
 		$picid = "";
 		$size[0] = 528;
 		$size[1] = 512;
+		$url .= date("ymd",time()).date("H",floor(time()/(3600*3)-1)*3600*3).'.png';
 	}
 	if ($args[0] == "now?") $args[0] = "";
 	if (!defined('MOD_PUKI_UPLOAD_DIR'))  $args[0] = ""; //画像のキャッシュは使用出来ない。
@@ -51,38 +53,20 @@ function plugin_tenki_inline()
 function plugin_tenki_cache_image_fetch($target, $id) {
 	$filename = MOD_PUKI_UPLOAD_DIR.$id."_tenki.gif";
 	if (!is_readable($filename)) {
-		$file = fopen($target, "rb"); // たぶん size 取得よりこちらが原始的だからやや速い
-		if (! $file) {
-			fclose($file);
-			$url = MOD_PUKI_NOIMAGE;
+		$result = PukiWikiFunc::http_request($target);
+		if ($result['rc'] == 200) {
+			$data = $result['data'];
+			plugin_tenki_cache_image_save($data, $filename);
+			$size = @getimagesize($filename);
+			$url = MOD_PUKI_UPLOAD_URL.$id."_tenki.gif";
 		} else {
-			// リモートファイルのパケット有効後対策
-			// http://search.net-newbie.com/php/function.fread.html
-			$contents = "";
-			do {
-				$data = fread($file, 8192);
-				if (strlen($data) == 0) {
-					break;
-				}
-				$contents .= $data;
-			} while(true);
-			
-			fclose ($file);
-			
-			$data = $contents;
-			unset ($contents);
-			$size = @getimagesize($target); // あったら、size を取得、通常は1が返るが念のため0の場合も(reimy)
-			if ($size[0] <= 1)
-				$url = MOD_PUKI_NOIMAGE;
-			else
-				$url = MOD_PUKI_UPLOAD_URL.$id."_tenki.gif";
+			$url = '';
+			$size = false;
 		}
-		plugin_tenki_cache_image_save($data, $filename);
 	} else {
 		$url = MOD_PUKI_UPLOAD_URL.$id."_tenki.gif";
+		$size = @getimagesize($filename);
 	}
-	$size = @getimagesize($filename);
-	
 	return array($url,$size);
 }
 // 画像キャッシュを保存

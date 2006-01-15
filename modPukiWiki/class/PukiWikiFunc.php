@@ -8,6 +8,16 @@
 // 修正元ファイル：PukiWiki 1.4のfile.php func.php html.php proxy.phpから利用関数のみを抽出。
 //
 class PukiWikiFunc {
+	// ソースを取得
+	function get_source($page)
+	{	
+		if(PukiWikiFunc::is_page($page))
+		{
+			$ret = preg_replace("/\x0D\x0A|\x0D|\x0A/","\n", file(PukiWikiFunc::get_filename($page)));
+			return $ret;
+		}
+		return array();
+	}
 	// 文字列がURLかどうか
 	function is_url($str,$only_http=FALSE)
 	{
@@ -75,7 +85,9 @@ class PukiWikiFunc {
 	// ページ名のエンコード
 	function encode($key)
 	{
-		return ($key == '') ? '' : strtoupper(join('',unpack('H*0',$key)));
+		return ($key == '') ? '' : strtoupper(bin2hex($key));
+	// Equal to strtoupper(join('', unpack('H*0', $key)));
+	// But PHP 4.3.10 says 'Warning: unpack(): Type H: outside of string in ...'
 	}
 
 	// ページ名のデコード
@@ -423,5 +435,21 @@ class PukiWikiFunc {
 		$page_id[$page] = $ret[0];
 		return $ret[0];
 	}
+	//ページ名エイリアスの配列を得る
+	function get_pagename_aliases()
+	{
+		$_aliases = array();
+		foreach(PukiWikiFunc::get_source(':config/aliases') as $_line)
+		{
+			if (preg_match("/\[(.+?) (.+?)\](.*)/",$_line,$_match) && PukiWikiFunc::is_page($_match[2])) {
+				$_aliases[$_match[1]] = $_match[2];
+				if ($_match[3]) {
+					$_aliases[$_match[1]] .= '!'.$_match[3];
+				}
+			}
+		}
+		return $_aliases;
+	}
+
 }
 ?>

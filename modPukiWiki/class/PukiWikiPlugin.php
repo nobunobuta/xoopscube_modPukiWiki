@@ -36,20 +36,20 @@ class PukiWikiPlugin {
 
 	//プラグイン関数(action)が存在するか
 	function exist_plugin_action($name) {
-		return	function_exists('plugin_' . $name . '_action') ? TRUE : PukiWikiPlugin::exist_plugin($name) ?
-			function_exists('plugin_' . $name . '_action') : FALSE;
+		return	function_exists('plugin_' . $name . '_action') ? TRUE : (PukiWikiPlugin::exist_plugin($name) ?
+			function_exists('plugin_' . $name . '_action') : FALSE);
 	}
 
 	//プラグイン関数(convert)が存在するか
 	function exist_plugin_convert($name) {
-		return	function_exists('plugin_' . $name . '_convert') ? TRUE : PukiWikiPlugin::exist_plugin($name) ?
-			function_exists('plugin_' . $name . '_convert') : FALSE;
+		return	function_exists('plugin_' . $name . '_convert') ? TRUE : (PukiWikiPlugin::exist_plugin($name) ?
+			function_exists('plugin_' . $name . '_convert') : FALSE);
 	}
 
 	//プラグイン関数(inline)が存在するか
 	function exist_plugin_inline($name) {
-		return	function_exists('plugin_' . $name . '_inline') ? TRUE : PukiWikiPlugin::exist_plugin($name) ?
-			function_exists('plugin_' . $name . '_inline') : FALSE;
+		return	function_exists('plugin_' . $name . '_inline') ? TRUE : (PukiWikiPlugin::exist_plugin($name) ?
+			function_exists('plugin_' . $name . '_inline') : FALSE);
 	}
 
 	//プラグインの初期化を実行

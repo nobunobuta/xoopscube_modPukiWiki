@@ -122,7 +122,7 @@ function plugin_isbn_inline() {
 		if ($option) $title = $text;
 		return $amazon_a . $title . '</a>';
 	} else {
-		$url = plugin_isbn_cache_image_fetch($isbn);
+		$url = plugin_isbn_cache_image_fetch($isbn, $info);
 		return $amazon_a.'<img src="'.$url.'" alt="'.$alt.'" /></a>';
 	}
 }
@@ -150,7 +150,7 @@ function plugin_isbn_get_caption($data)
 	if ($data[5]) $alt .= "{$br}発売日: $data[5]";
 	if ($data[6]) $alt .= "{$br}発売元: $data[6]";
 	if ($data[7]) $alt .= "{$br}発送状況: $data[7]";
-	return $alt;
+	return htmlspecialchars($alt);
 }
 
 function plugin_isbn_get_info($data,$isbn)
@@ -214,7 +214,7 @@ function plugin_isbn_print_isbn_img($isbn, $align, $alt, $title, $h_title, $pric
 		return '<div style="clear:both"></div>';
 	}
 
-	if (! ($url = plugin_isbn_cache_image_fetch($isbn, MOD_PUKI_UPLOAD_DIR, true, $img_size))) return false;
+	if (! ($url = plugin_isbn_cache_image_fetch($isbn, $info, true, $img_size))) return false;
 
 	if ($title == 'image') {				// タイトルがなければ、画像のみ表示
 		return <<<EOD
@@ -223,7 +223,6 @@ function plugin_isbn_print_isbn_img($isbn, $align, $alt, $title, $h_title, $pric
 </div>
 EOD;
 	} else {					// 通常表示
-		 $img_size = GetImageSize($url);
 		if (substr($isbn,0,1) == "B"){
 				$code = "ASIN: ".$isbn;
 		} else {
@@ -232,8 +231,8 @@ EOD;
 		 if ($header != "header"){
 return <<<EOD
 <div style="float:$align;padding:.5em 1.5em .5em 1.5em;text-align:center">
- {$amazon_a}<img src="$url" alt="$alt" /></a><br/>
- <table style="width:{$img_size[0]}px;border:0"><tr>
+ {$amazon_a}<img src="$url" alt="$alt" /></a><br />
+ <table style="width:{$info[0]}px;border:0"><tr>
 	<td style="text-align:left">{$amazon_a}$title</a></td>
  </tr></table>
 </div>
@@ -259,11 +258,17 @@ function plugin_isbn_get_isbn_title($isbn,$check=true) {
 	if (file_exists(MOD_PUKI_UPLOAD_DIR) === false or is_writable(MOD_PUKI_UPLOAD_DIR) === false) {
 		$nocachable = 1;							// キャッシュ不可の場合
 	}
-	if ($title = plugin_isbn_cache_fetch($isbn, MOD_PUKI_UPLOAD_DIR, $check)) {
+	if ($title = plugin_isbn_cache_fetch($isbn, $check)) {
 		list($title,$category,$price,$author,$artist,$releasedate,$manufacturer,$availability,$listprice,$usedprice) = $title;
 	} else {
 		$nocache = 1;				// キャッシュ見つからず
-		$body = implode('', file($url));		// しかたないので取りにいく
+		// しかたないので取りにいく
+		$result = PukiWikiFunc::http_request($url);
+		if ($result['rc'] !== 200) {
+			$body = '';
+		} else {
+			$body = $result['data'];
+		}
 		$body = mb_convert_encoding($body,MOD_PUKI_SOURCE_ENCODING,"UTF-8");
 		$category = (preg_match("/<Catalog>(.+)<\/Catalog>/",$body,$data))? trim($data[1]) : "";
 		$title = (preg_match("/<ProductName>(.+)<\/ProductName>/",$body,$data))? trim($data[1]) : "";
@@ -282,7 +287,7 @@ function plugin_isbn_get_isbn_title($isbn,$check=true) {
 	}
 	if ($title != '') {				// タイトルがあれば、できるだけキャッシュに保存
 		if ($nocache == 1 and $nocachable != 1) {
-			plugin_isbn_cache_save("$title<>$category<>$price<>$author<>$artist<>$releasedate<>$manufacturer<>$availability<>$listprice<>$usedprice", $isbn, MOD_PUKI_UPLOAD_DIR);
+			plugin_isbn_cache_save("$title<>$category<>$price<>$author<>$artist<>$releasedate<>$manufacturer<>$availability<>$listprice<>$usedprice", $isbn);
 		}
 	} else {					// しかたない場合 ISBN:xxxxxxxx 形式のタイトル
 		if ($check)
@@ -295,8 +300,8 @@ function plugin_isbn_get_isbn_title($isbn,$check=true) {
 }
 
 // キャッシュがあるか調べる
-function plugin_isbn_cache_fetch($target, $dir, $check=true) {
-	$filename = $dir.PukiWikiFunc::encode("ISBN".$target.".dat");
+function plugin_isbn_cache_fetch($target, $check=true) {
+	$filename = MOD_PUKI_UPLOAD_DIR.PukiWikiFunc::encode("ISBN".$target.".dat");
 	
 	if (!is_readable($filename))
 		return "";
@@ -313,54 +318,51 @@ function plugin_isbn_cache_fetch($target, $dir, $check=true) {
 }
 
 // 画像キャッシュがあるか調べる
-function plugin_isbn_cache_image_fetch($target, $dir, $check=true, $img_size="M") {
+function plugin_isbn_cache_image_fetch($target, &$info, $check=true, $img_size="M") {
 	$filename = MOD_PUKI_UPLOAD_DIR.PukiWikiFunc::encode("ISBN".$target.$img_size.".jpg");
 
 	if (!is_readable($filename) || (is_readable($filename) && $check && MOD_PUKI_ISBN_AMAZON_EXPIRE_IMG * 3600 * 24 < time() - filemtime($filename))) {
 		$url = "http://images-jp.amazon.com/images/P/" . strtoupper($target) . ".09.".$img_size."ZZZZZZZ.jpg";
 		if (!PukiWikiFunc::is_url($url)) return false; // URL 形式チェック
-		$size = @getimagesize($url);
-		if ($size[0] <= 1) {
+		$result = PukiWikiFunc::http_request($url);
+		if ($result['rc'] !== 200) {
+			$data = '';
+			$info[0] = 0;
+		} else {
+			$data = $result['data'];
+			plugin_isbn_cache_image_save($data, $filename);
+			$info = @getimagesize($filename);
+		}
+		if ($info[0] <= 1) {
 			$url = "http://images-jp.amazon.com/images/P/" . strtoupper($target) . ".01.".$img_size."ZZZZZZZ.jpg";
-			$size = @getimagesize($url);
-			if ($size[0] <= 1) { 
+			$result = PukiWikiFunc::http_request($url);
+			if ($result['rc'] !== 200) {
+				$data = '';
+				$info[0] = 0;
+			} else {
+				$data = $result['data'];
+				plugin_isbn_cache_image_save($data, $filename);
+				$info = @getimagesize($filename);
+			}
+			if ($info[0] <= 1) {
 				$url = $noimage = ($img_size == "M") ? MOD_PUKI_NOIMAGE : MOD_PUKI_NOIMAGE_S;
+				$result = PukiWikiFunc::http_request($url);
+				if ($result['rc'] === 200) {
+					$data = $result['data'];
+					plugin_isbn_cache_image_save($data, $filename);
+					$info = @getimagesize($filename);
+				}
 			}
 		}
-		if ($url != $noimage){
-			$file = fopen($url, "rb");
-			// リモートファイルのパケット有効後対策
-			// http://search.net-newbie.com/php/function.fread.html
-			$contents = "";
-			do {
-				$data = fread($file, 8192);
-				if (strlen($data) == 0) {
-					break;
-				}
-				$contents .= $data;
-			} while(true);
-			
-			fclose ($file);
-			
-			$data = $contents;
-			unset ($contents);
-			$url = $filename;
-		} else {
-			// キャッシュを NOIMAGE のコピーとする
-			$file = fopen($url, "rb");
-			if (! $file) return false;
-			$data = fread($file, 100000); 
-			fclose ($file);
-		}
-		plugin_isbn_cache_image_save($data, $target.$img_size, MOD_PUKI_UPLOAD_DIR);
-		return MOD_PUKI_UPLOAD_URL.PukiWikiFunc::encode("ISBN".$target.$img_size.".jpg");;
-	} else
-		return MOD_PUKI_UPLOAD_URL.PukiWikiFunc::encode("ISBN".$target.$img_size.".jpg");;
+	} else {
+	  $info = @getimagesize($filename);
+	}
+	return MOD_PUKI_UPLOAD_URL.PukiWikiFunc::encode("ISBN".$target.$img_size.".jpg");;
 }
 
 // キャッシュを保存
-function plugin_isbn_cache_save($data, $target, $dir) {
-	$filename = $dir.PukiWikiFunc::encode("ISBN".$target.".dat");
+function plugin_isbn_cache_save($data, $target) {
+	$filename = MOD_PUKI_UPLOAD_DIR.PukiWikiFunc::encode("ISBN".$target.".dat");
 	$fp = fopen($filename, "w");
 	fwrite($fp, $data);
 	fclose($fp);
@@ -368,14 +370,10 @@ function plugin_isbn_cache_save($data, $target, $dir) {
 }
 
 // 画像キャッシュを保存
-function plugin_isbn_cache_image_save($data, $target, $dir) {
-	
-	$filename = $dir.PukiWikiFunc::encode("ISBN".$target.".jpg");
-
+function plugin_isbn_cache_image_save($data, $filename) {
 	$fp = fopen($filename, "wb");
 	fwrite($fp, $data);
 	fclose($fp);
-
 	return $filename;
 }
 
