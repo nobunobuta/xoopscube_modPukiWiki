@@ -110,7 +110,7 @@ function & Factory_PukiWikiTable(& $root, $text)
 
 function & Factory_PukiWikiYTable(& $root, $text)
 {
-	$_value = csv_explode(',', substr($text, 1));
+	$_value = PukiWikiFunc::csv_explode(',', substr($text, 1));
 	if (count($_value) == 0) {
 		return Factory_PukiWikiInline($text);
 	} else {
