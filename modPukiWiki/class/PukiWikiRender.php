@@ -57,7 +57,7 @@ class PukiWikiRender {
 		PukiWikiConfig::addRuleArray($_rules);
 		
 		PukiWikiConfig::initInterWiki();
-		$this->_body = &new PukiWikiBody($this,1);
+		$this->_body = &new PukiWikiBody(1);
 		//コンストラクタのパラメータで$configが指定されている場合は、読み込む。
 		if ($config and file_exists(MOD_PUKI_CONFIG_DIR.$config.".php")) {
 			include (MOD_PUKI_CONFIG_DIR.$config.".php");
@@ -97,7 +97,7 @@ class PukiWikiRender {
 		$this->_init_PukiWiki_env();
 		
 		// キャッシュ確認 by nao-pon
-		if (PukiWikiConfig::getParam('use_cache')) {
+		if (defined('MOD_PUKI_CACHE_DIR') && PukiWikiConfig::getParam('use_cache')) {
 			$cache_file = MOD_PUKI_CACHE_DIR.$this->_md5hash.".cache";
 			if (file_exists($cache_file)) return;
 		}
@@ -119,7 +119,7 @@ class PukiWikiRender {
 		global $_PukiWikiFootExplain;
 
 		// キャッシュ確認 by nao-pon
-		if (PukiWikiConfig::getParam('use_cache')) {
+		if (defined('MOD_PUKI_CACHE_DIR') &&PukiWikiConfig::getParam('use_cache')) {
 			$cache_file = MOD_PUKI_CACHE_DIR.$this->_md5hash.".cache";
 			if (file_exists($cache_file)) return join('',file($cache_file));
 		}
@@ -222,35 +222,39 @@ class PukiWikiRender {
 		if ((PukiWikiConfig::getParam('autolink')) && (defined('MOD_PUKI_WIKI_CACHE_DIR')) && (file_exists(MOD_PUKI_WIKI_CACHE_DIR.'autolink.dat'))) {
 //			$autolink_dat = file(MOD_PUKI_WIKI_CACHE_DIR.'autolink.dat');
 			$autolink_dat = file(MOD_PUKI_WIKI_CACHE_DIR.((file_exists(MOD_PUKI_WIKI_CACHE_DIR.'autolink2.dat'))? 'autolink2.dat' : 'autolink.dat'));
-			if (!file_exists(MOD_PUKI_CACHE_DIR .'autolink.dat') || ($autolink_dat != file(MOD_PUKI_CACHE_DIR .'autolink.dat'))) {
-				// 比較用オートリンクデータを保存
-				@list($pattern, $pattern_a, $forceignorelist) = $autolink_dat;
-				if ($fp = fopen(MOD_PUKI_CACHE_DIR . 'autolink.dat', 'wb')) {
-					set_file_buffer($fp, 0);
-					flock($fp, LOCK_EX);
-					rewind($fp);
-					fputs($fp, trim($pattern)   . "\n");
-					if (count($autolink_dat)==3) {
-						fputs($fp, trim($pattern_a) . "\n");
-						fputs($fp, trim($forceignorelist) . "\n");
-					}
-					flock($fp, LOCK_UN);
-					fclose($fp);
-				} else {
-//					die_message('Cannot write autolink file '. MOD_PUKI_CACHE_DIR . '/autolink.dat<br />Maybe permission is not writable');
-				}
-				
-				// オートリンクデータが更新されているのでキャッシュをクリア
-				$dh = dir(MOD_PUKI_CACHE_DIR);
-				while (($file = $dh->read()) !== FALSE) {
-					if (substr($file,-6) != '.cache') {
-						continue;
-					}
-					$file = MOD_PUKI_CACHE_DIR.$file;
-					unlink($file);
-				}
-				$dh->close();
-			}
+			if (defined('MOD_PUKI_CACHE_DIR')) {
+    			if (!file_exists(MOD_PUKI_CACHE_DIR .'autolink.dat') || ($autolink_dat != file(MOD_PUKI_CACHE_DIR .'autolink.dat'))) {
+    				// 比較用オートリンクデータを保存
+    				@list($pattern, $pattern_a, $forceignorelist) = $autolink_dat;
+    				if ($fp = fopen(MOD_PUKI_CACHE_DIR . 'autolink.dat', 'wb')) {
+    					set_file_buffer($fp, 0);
+    					flock($fp, LOCK_EX);
+    					rewind($fp);
+    					fputs($fp, trim($pattern)   . "\n");
+    					if (count($autolink_dat)==3) {
+    						fputs($fp, trim($pattern_a) . "\n");
+    						fputs($fp, trim($forceignorelist) . "\n");
+    					}
+    					flock($fp, LOCK_UN);
+    					fclose($fp);
+    				} else {
+    //					die_message('Cannot write autolink file '. MOD_PUKI_CACHE_DIR . '/autolink.dat<br />Maybe permission is not writable');
+    				}
+    				
+    				// オートリンクデータが更新されているのでキャッシュをクリア
+    				$dh = dir(MOD_PUKI_CACHE_DIR);
+    				if ($dh) {
+        				while (($file = $dh->read()) !== FALSE) {
+        					if (substr($file,-6) != '.cache') {
+        						continue;
+        					}
+        					$file = MOD_PUKI_CACHE_DIR.$file;
+        					unlink($file);
+        				}
+        				$dh->close();
+        			}
+    			}
+    		}
 		}
 		PukiWikiConfig::setParam('autolink_dat',$autolink_dat);
 		// ページ名エイリアス取得
